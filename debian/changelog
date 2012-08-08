@@ -1,0 +1,5 @@
+axiomeatic (0.1-1) precise; urgency=low
+
+  * Initial release (closes: bug#00100)
+
+ -- Michael Hall <hallm2533@gmail.com>  Tue, 07 Aug 2012 17:27:31 -0400

@@ -1,0 +1,3 @@
+include axiomeatic README axiomeatic.desktop axiomeatic.icon axiomeatic.1
+recursive-include python_axiomeatic/res *
+recursive-include debian *

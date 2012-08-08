@@ -1,0 +1,14 @@
+AXIOMATIC
+=========
+
+A companion GUI for AXIOME (Automation, Extension, and Integration of Microbial Ecology).
+This interace guides the user through the creation of a .ax file, which can be sent to a server
+running AXIOME, and used to initiate an analysis.
+
+This package requires Python 2.7, python-gi, and pygtk.
+
+To install from source, run:
+sudo python setup.py install
+
+Then, run the command `axiomeatic` and follow the wizard to create a .ax file for your AXIOME
+analysis.
