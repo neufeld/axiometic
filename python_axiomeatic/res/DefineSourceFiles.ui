@@ -3,14 +3,15 @@
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="axiome_define_source_files">
-    <property name="width_request">400</property>
+    <property name="width_request">550</property>
     <property name="height_request">250</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AXIOME: Define Source Files</property>
     <property name="window_position">center</property>
+    <property name="default_width">550</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkVBox" id="box1">
+      <object class="GtkVBox" id="boxSource">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
@@ -46,7 +47,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow1">
+          <object class="GtkScrolledWindow" id="scrwinSource">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="shadow_type">in</property>
@@ -87,11 +88,46 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="box2">
+          <object class="GtkHBox" id="boxBottomButtons">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkHButtonBox" id="buttonbox1">
+              <object class="GtkButton" id="btnSourceBack">
+                <property name="label" translatable="yes">&lt; Back</property>
+                <property name="width_request">80</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="on_btnSourceBack_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">20</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnSourceNext">
+                <property name="label" translatable="yes">Next &gt;</property>
+                <property name="width_request">80</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="on_btnSourceNext_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">20</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHButtonBox" id="btnboxSource">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">10</property>
@@ -146,25 +182,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">15</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="btnSourceNext">
-                <property name="label" translatable="yes">Next</property>
-                <property name="width_request">80</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <signal name="clicked" handler="on_btnSourceNext_clicked" object="axiome_define_source_files" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="padding">20</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
@@ -184,11 +202,11 @@
     <property name="window_position">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkVBox" id="box5">
+      <object class="GtkVBox" id="boxFastaMain">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkHBox" id="box6">
+          <object class="GtkHBox" id="boxFastaInput">
             <property name="height_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -231,7 +249,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="box7">
+          <object class="GtkHBox" id="boxFastaButtons">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -402,6 +420,7 @@
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="changed" handler="on_txtFastqFwd_changed" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -417,6 +436,7 @@
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="changed" handler="on_txtFastqRev_changed" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -521,7 +541,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="box9">
+          <object class="GtkHBox" id="boxFastqButtons">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
@@ -576,7 +596,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
     <property name="window_position">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkVBox" id="box3">
+      <object class="GtkVBox" id="boxSelectFileMain">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
@@ -597,7 +617,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="box4">
+          <object class="GtkHBox" id="boxSelectFileImages">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
@@ -636,7 +656,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           </packing>
         </child>
         <child>
-          <object class="GtkHButtonBox" id="buttonbox2">
+          <object class="GtkHButtonBox" id="btnboxSelectFile">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">spread</property>
@@ -679,7 +699,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="hbox1">
+          <object class="GtkHBox" id="boxSelectFileCancel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>

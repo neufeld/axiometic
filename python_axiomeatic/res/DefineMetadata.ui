@@ -20,7 +20,7 @@
             <property name="xalign">0.029999999329447746</property>
             <property name="label" translatable="yes">Step 1: Define Metadata</property>
             <attributes>
-              <attribute name="font-desc" value="Ubuntu Light 20"/>
+              <attribute name="scale" value="1.5"/>
             </attributes>
           </object>
           <packing>
@@ -144,7 +144,7 @@
             </child>
             <child>
               <object class="GtkButton" id="btnNext1">
-                <property name="label" translatable="yes">Next</property>
+                <property name="label" translatable="yes">Next &gt;</property>
                 <property name="width_request">80</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

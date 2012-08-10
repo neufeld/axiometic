@@ -515,6 +515,7 @@ class WindowManager(object):
 			self.DefineMetadata.hide()
 			self.DefineSourceFiles.show()
 		else:
+			self.DefineMetadata.hide()
 			self.DefineSourceFiles.show()
 			
 	def on_btnMetadataAdd_clicked(self, treeview):
@@ -618,6 +619,10 @@ class WindowManager(object):
 		self.builder.get_object("cmbFastqVers").set_active(5)
 		self.builder.get_object("axiome_fastq_panda").show()
 		
+	def on_btnSourceBack_clicked(self,widget):
+		self.DefineSourceFiles.hide()
+		self.DefineMetadata.show()
+		
 	def on_btnSourceNext_clicked(self, window):
 		source_list = self.builder.get_object("lstSourceInfo")
 		if len(source_list) == 0:
@@ -651,8 +656,8 @@ class WindowManager(object):
 			filenamelabel = self.builder.get_object("lblSampleFilename")
 			step3label.set_label("Step 3: Define Samples (File 1 of " + str(numfiles) + ")")
 			filenamelabel.set_label("Filename: " + filelist[0][1])
-			window.hide()
-			self.DefineSamples.show_all()
+			self.DefineSourceFiles.hide()
+			self.DefineSamples.show()
 		
 	### Format Definition Windows ###
 	
@@ -743,6 +748,40 @@ class WindowManager(object):
 	def on_sample_data_edited(self, textrenderer, path, new_text, colindex=0):
 		selectedrow = self.SampleData[self.SampleFileIndex].get_iter(path)
 		self.SampleData[self.SampleFileIndex].set(selectedrow, colindex, new_text)
+	
+	def update_sample_display(self):
+			treeview = self.builder.get_object("treSampleData")
+			filelist = self.builder.get_object("lstSourceInfo")
+			treeview.set_model(self.SampleData[self.SampleFileIndex])
+			step3label = self.builder.get_object("lblStep3")
+			filenamelabel = self.builder.get_object("lblSampleFilename")
+			step3label.set_label("Step 3: Define Samples (File " + str(self.SampleFileIndex + 1) + " of " + str(len(filelist)) + ")")
+			filenamelabel.set_label("Filename: " + filelist[self.SampleFileIndex][1])
+			colHeader = self.builder.get_object("colID")
+			if filelist[self.SampleFileIndex][0].lower() == "fasta":
+				colHeader.set_title("Regex")
+			elif filelist[self.SampleFileIndex][0].lower() == "panda":
+				colHeader.set_title("Tag")
+		
+	def on_btnSampleBack_clicked(self, widget):
+		if (self.SampleFileIndex == 0):
+			lblError = gtk.Label("Going back will erase all input metadata.\nContinue?")
+			lblError.set_justify(gtk.JUSTIFY_CENTER)
+			dialog = gtk.Dialog("AXIOME: Back?", None, gtk.DIALOG_MODAL | \
+			gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO))
+			dialog.get_content_area().pack_start(lblError, True, True, 25)
+			lblError.show()
+			response = dialog.run()
+			dialog.destroy()
+			if response == gtk.RESPONSE_YES:
+				self.DefineSamples.hide()
+				self.DefineSourceFiles.show()
+				return False
+			else:
+				return True
+		else:
+			self.SampleFileIndex -= 1
+			self.update_sample_display()
 
 	def on_btnSampleNext_clicked(self, treeview):
 		data_list = treeview.get_model()
@@ -757,18 +796,8 @@ class WindowManager(object):
 			error_dialogue("One or more metadata fields empty.\nAll fields must be filled.")
 		else:
 			if ((self.SampleFileIndex +1) < len(self.SampleData)):
-				filelist = self.builder.get_object("lstSourceInfo")
 				self.SampleFileIndex += 1
-				treeview.set_model(self.SampleData[self.SampleFileIndex])
-				step3label = self.builder.get_object("lblStep3")
-				filenamelabel = self.builder.get_object("lblSampleFilename")
-				step3label.set_label("Step 3: Define Samples (File " + str(self.SampleFileIndex + 1) + " of " + str(len(filelist)) + ")")
-				filenamelabel.set_label("Filename: " + filelist[self.SampleFileIndex][1])
-				colHeader = self.builder.get_object("colID")
-				if filelist[self.SampleFileIndex][0].lower() == "fasta":
-					colHeader.set_title("Regex")
-				elif filelist[self.SampleFileIndex][0].lower() == "panda":
-					colHeader.set_title("Tag")
+				self.update_sample_display()
 			else:
 				if (self.DefineAnalyses == None):
 					self.builder.add_from_file(determine_path() + "/res/DefineAnalyses.ui")
@@ -899,6 +928,10 @@ class WindowManager(object):
 	def on_chkMultiCore_toggled(self, checkbox):
 		self.builder.get_object("lblNumCores").set_sensitive(checkbox.get_active())
 		self.builder.get_object("spnNumCores").set_sensitive(checkbox.get_active())
+		
+	def on_btnAnalysesBack_clicked(self, widget):
+		self.DefineAnalyses.hide()
+		self.DefineSamples.show()
 	
 	def on_btnLaunchSave_clicked(self, savedialog):
 		chooser = gtk.FileChooserDialog(title="Save File",action=gtk.FILE_CHOOSER_ACTION_SAVE, \
