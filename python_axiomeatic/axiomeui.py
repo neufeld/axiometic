@@ -26,7 +26,8 @@
 
 import pygtk, os, sys
 pygtk.require("2.0")
-from gi.repository import Gtk, GObject, Gio
+import gtk, gobject, gio
+#from gi.repository import Gtk, gobject, Gio
 
 def determine_path():
     """Borrowed from wxglade.py"""
@@ -88,7 +89,8 @@ class AlphaDiv(Analysis):
 		
 	def construct_widgets(self):
 		#No widgets required
-		label = "Perform an Alpha Diversity analysis (ie, QIIME's Chao1 curves). Will make use of multiple cores if the option is enabled."
+		label = "Perform an Alpha Diversity analysis (ie, QIIME's Chao1 curves).\n \
+		Will make use of multiple cores if the option is enabled."
 		return self.widgetContainer, label
 		
 class BetaDiv(Analysis):
@@ -98,26 +100,31 @@ class BetaDiv(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(4, 2)
-		label = "Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the  plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead. The library may be rarefied to a particular size by specifying size or it may be set to auto to use the smallest sample size; if not specified, the library is not rarefied, which is probably incorrect.  Specifying  taxa  can  limit  the number of taxa that appear in the biplot; the default is 10 and all can be specified if desired. The background colour can also be specified using the background attribute. The colour is interpreted by QIIME. The  default is white, despite black seeming to be the popular choice."
-		lblLevel = Gtk.Label("Level:")
-		lblSize = Gtk.Label("Size:")
-		lblTaxa = Gtk.Label("Taxa:")
-		lblBackground = Gtk.Label("Background Colour:")
+		self.widgetContainer = gtk.Table(4, 2)
+		label = "Do a QIIME beta diversity analysis and produce biplots and bubble plots.\n\n\
+QIIME normally uses summarised taxa for the  plots, so the taxonomic level can \
+be specified; if it is omitted, OTUs are used instead."
+		lblLevel = gtk.Label("Level:")
+		lblSize = gtk.Label("Size:")
+		lblSize.set_tooltip_text("Rarefies library to specific size. 'auto' for smallest sample size. Default: none")
+		lblTaxa = gtk.Label("Taxa:")
+		lblTaxa.set_tooltip_text("Limits the number of taxa in biplot. Default: 10")
+		lblBackground = gtk.Label("Background Colour:")
+		lblBackground.set_tooltip_text("Plot background colour. Default: white")
 		levelList = [ "All", "Life", "Domain", "Phylum", "Class", "Order", "Family", "Genus", \
 		"Species", "Strain" ]
-		cmbLevel = Gtk.ComboBoxText()
+		cmbLevel = gtk.combo_box_new_text()
 		for level in levelList:
 			cmbLevel.append_text(level)
-		txtSize = Gtk.Entry()
-		txtTaxa = Gtk.Entry()
-		txtBackground = Gtk.Entry()
+		txtSize = gtk.Entry()
+		txtTaxa = gtk.Entry()
+		txtBackground = gtk.Entry()
 		self.widgetInfo.append((cmbLevel, "ComboBoxText", False, "level"))
 		self.widgetInfo.append((txtSize, "Entry", False, "size"))
 		self.widgetInfo.append((txtTaxa, "Entry", False, "taxa"))
 		self.widgetInfo.append((txtBackground, "Entry", False, "background"))
 		self.widgetContainer.attach(lblLevel, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbLevel, 1, 2, 0, 1, yoptions=Gtk.AttachOptions.SHRINK, xpadding=5, ypadding=5)
+		self.widgetContainer.attach(cmbLevel, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(lblSize, 2, 3, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(txtSize, 3, 4, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(lblTaxa, 0, 1, 1, 2, xpadding=5, ypadding=5)
@@ -134,12 +141,13 @@ class BLAST(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(4, 1)
-		label = "Create a BLAST DB with the specified title, and using the specified blastdb creation command."
-		lblTitle = Gtk.Label("Title:")
-		lblDBCmd = Gtk.Label("BLAST DB Command:")
-		txtTitle = Gtk.Entry()
-		cmbDBCmd = Gtk.ComboBoxText()
+		self.widgetContainer = gtk.Table(4, 1)
+		label = "Create a BLAST DB with the specified title, and using the \
+specified blastdb creation command."
+		lblTitle = gtk.Label("Title:")
+		lblDBCmd = gtk.Label("BLAST DB Command:")
+		txtTitle = gtk.Entry()
+		cmbDBCmd = gtk.combo_box_new_text()
 		cmbDBCmd.append_text("formatdb")
 		cmbDBCmd.append_text("makeblastdb")
 		self.widgetInfo.append((txtTitle, "Entry", False, "title"))
@@ -147,7 +155,7 @@ class BLAST(Analysis):
 		self.widgetContainer.attach(lblTitle, 0, 1, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(txtTitle, 1, 2, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(lblDBCmd, 2, 3, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbDBCmd, 3, 4, 0, 1, yoptions=Gtk.AttachOptions.SHRINK, xpadding=5, ypadding=5)
+		self.widgetContainer.attach(cmbDBCmd, 3, 4, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
 		return self.widgetContainer, label
 
 class CompareLibs(Analysis):
@@ -158,18 +166,18 @@ class CompareLibs(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
+		self.widgetContainer = gtk.Table(2,1)
 		label = "Compare libraries at the specified taxonomic level."
-		lblLevel = Gtk.Label("<span color=\"#FF0000\">Level:</span>")
+		lblLevel = gtk.Label("<span color=\"#FF0000\">Level:</span>")
 		lblLevel.set_use_markup(True)
 		levelList = [ "Life", "Domain", "Phylum", "Class", "Order", "Family", "Genus", \
 		"Species", "Strain" ]
-		cmbLevel = Gtk.ComboBoxText()
+		cmbLevel = gtk.combo_box_new_text()
 		for level in levelList:
 			cmbLevel.append_text(level)
 		self.widgetInfo.append((cmbLevel, "ComboBoxText", True, "level"))
 		self.widgetContainer.attach(lblLevel, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbLevel, 1, 2, 0, 1, yoptions=Gtk.AttachOptions.SHRINK, xpadding=5, ypadding=5)
+		self.widgetContainer.attach(cmbLevel, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
 		return self.widgetContainer, label
 
 class Duleg(Analysis):
@@ -179,10 +187,12 @@ class Duleg(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
-		label = "Compute a Dufrene-Legendre indicator species analysis on numerical metadata fields. Uses the specified p-value as the cut-off to be included in the indicator species list."
-		lblPVal = Gtk.Label("p Value:")
-		txtPVal = Gtk.Entry()
+		self.widgetContainer = gtk.Table(2,1)
+		label = "Compute a Dufrene-Legendre indicator species analysis on numerical \
+metadata fields. Uses the specified p-value as the cut-off to be included in \
+the indicator species list."
+		lblPVal = gtk.Label("p Value:")
+		txtPVal = gtk.Entry()
 		self.widgetInfo.append((txtPVal, "Entry", False, "p"))
 		self.widgetContainer.attach(lblPVal, 0, 1, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(txtPVal, 1, 2, 0, 1, xpadding=5, ypadding=5)
@@ -207,10 +217,13 @@ class Jackknife(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
-		label = "Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) of the OTU table using  QIIME's  jackknifed_beta_diversity.py script. Size parameter is optional must be a positive number no larger than the largest number of sequences in a sample."
-		lblSize = Gtk.Label("Size:")
-		txtSize = Gtk.Entry()
+		self.widgetContainer = gtk.Table(2,1)
+		label = "Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) \
+of the OTU table using  QIIME's  jackknifed_beta_diversity.py script. Size \
+parameter is optional must be a positive number no larger than the largest \
+number of sequences in a sample."
+		lblSize = gtk.Label("Size:")
+		txtSize = gtk.Entry()
 		self.widgetInfo.append((txtSize, "Entry", False, "size"))
 		self.widgetContainer.attach(lblSize, 0, 1, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(txtSize, 1, 2, 0, 1, xpadding=5, ypadding=5)
@@ -223,17 +236,18 @@ class MRPP(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
-		label = "Compute  Multi  Response  Permutation Procedure of within-versus among-group dissimilarities in R using the specified distance method."
+		self.widgetContainer = gtk.Table(2,1)
+		label = "Compute  Multi  Response  Permutation Procedure of within-versus \
+among-group dissimilarities in R using the specified distance method."
 		distancemethods = [ "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford",  "raup", \
 		"binomial", "chao", "cao" ]
-		lblDistance = Gtk.Label("Distance Method:")
-		cmbDistance = Gtk.ComboBoxText()
+		lblDistance = gtk.Label("Distance Method:")
+		cmbDistance = gtk.combo_box_new_text()
 		for method in distancemethods:
 			cmbDistance.append_text(method)
 		self.widgetInfo.append((cmbDistance, "ComboBoxText", False, "method"))
 		self.widgetContainer.attach(lblDistance, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbDistance, 1, 2, 0, 1, yoptions=Gtk.AttachOptions.SHRINK, xpadding=5, ypadding=5)
+		self.widgetContainer.attach(cmbDistance, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
 		return self.widgetContainer, label
 
 class NMF(Analysis):
@@ -243,11 +257,14 @@ class NMF(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
-		label = "Compute Non-negative Matrix Factorization of the data using bases equal to the specified degree parameter. An appropriate degree parameter can be obtained by analysing an NMF Concordance plot for local maxima. Degree must be greater than 2, but less than 20."
-		lblDegree = Gtk.Label("<span color=\"#FF0000\">Degree:</span>")
+		self.widgetContainer = gtk.Table(2,1)
+		label = "Compute Non-negative Matrix Factorization of the data using bases \
+equal to the specified degree parameter. An appropriate degree parameter \
+can be obtained by analysing an NMF Concordance plot for local maxima. \
+Degree must be greater than 2, but less than 20."
+		lblDegree = gtk.Label("<span color=\"#FF0000\">Degree:</span>")
 		lblDegree.set_use_markup(True)
-		txtDegree = Gtk.Entry()
+		txtDegree = gtk.Entry()
 		self.widgetInfo.append((txtDegree, "Entry", True, "degree"))
 		self.widgetContainer.attach(lblDegree, 0, 1, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(txtDegree, 1, 2, 0, 1, xpadding=5, ypadding=5)
@@ -262,7 +279,10 @@ class NMFConcordance(Analysis):
 		
 	def construct_widgets(self):
 		#No widgets required
-		label = "Compute a concordance plot of the data for use in determining an appropriate degree value to create an NMF plot. The local maxima of the concordance plot are appropriate to be used as the degree parameter of an NMF analysis."
+		label = "Compute a concordance plot of the data for use in determining an \
+appropriate degree value to create an NMF plot. The local maxima of the \
+concordance plot are appropriate to be used as the degree parameter of an \
+NMF analysis."
 		return self.widgetContainer, label
 		
 class NMFAuto(Analysis):
@@ -274,7 +294,9 @@ class NMFAuto(Analysis):
 		
 	def construct_widgets(self):
 		#No widgets required
-		label = "Compute a concordance plot, and automatically search it for local maxima, and then run an NMF analysis on each one. Note that this will run an NMF analysis on all local maxima, which is potentially computationally expensive and time consuming."
+		label = "Compute a concordance plot, and automatically search it for local maxima, \
+and then run an NMF analysis on each one. Note that this will run an NMF analysis \
+on all local maxima, which is potentially computationally expensive and time consuming."
 		return self.widgetContainer, label
 
 class PCoA(Analysis):
@@ -284,17 +306,20 @@ class PCoA(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
-		label = "Create a 2D principal coordinate analysis plot using the two most significant dimensions. Plots an MDS plot, and if there is more than 1 numerical metadata field, a biplot will be created. Uses the specified distance method, and colours described in the \"Colour\" field of the metadata."
+		self.widgetContainer = gtk.Table(2,1)
+		label = "Create a 2D principal coordinate analysis plot using the two most \
+significant dimensions. Plots an MDS plot, and if there is more than 1 numerical \
+metadata field, a biplot will be created. Uses the specified distance method, \
+and colours described in the \"Colour\" field of the metadata."
 		distancemethods = [ "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford",  "raup", \
 		"binomial", "chao", "cao" ]
-		lblDistance = Gtk.Label("Distance Method:")
-		cmbDistance = Gtk.ComboBoxText()
+		lblDistance = gtk.Label("Distance Method:")
+		cmbDistance = gtk.combo_box_new_text()
 		for method in distancemethods:
 			cmbDistance.append_text(method)
 		self.widgetInfo.append((cmbDistance, "ComboBoxText", False, "method"))
 		self.widgetContainer.attach(lblDistance, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbDistance, 1, 2, 0, 1, yoptions=Gtk.AttachOptions.SHRINK, xpadding=5, ypadding=5)
+		self.widgetContainer.attach(cmbDistance, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
 		return self.widgetContainer, label
 
 class RankAbundance(Analysis):
@@ -317,7 +342,7 @@ class RDP(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(4,2)
+		self.widgetContainer = gtk.Table(4,2)
 		label = "Change the parameters used for RDP classification. \
 Confidence value is a numeric value between 0 and 1, where the \
 default is 0.8 (for short reads, 0.5 is recommended). The \
@@ -326,14 +351,14 @@ to use your own database for classification, otherwise it \
 defaults to your configured QIIME default. The max memory (MB) value \
 should be set to a higher value if using a custom database to prevent \
 RDP from running out of memory (default is 1000)."
-		lblConfidence = Gtk.Label("Confidence:")
-		lblTaxonomyFile = Gtk.Label("Taxonomy File:")
-		lblSeqFile = Gtk.Label("Sequence File:")
-		lblMaxMemory = Gtk.Label("Max Memory (MB):")
-		txtConfidence = Gtk.Entry()
-		txtTaxonomyFile = Gtk.Entry()
-		txtSeqFile = Gtk.Entry()
-		txtMaxMemory = Gtk.Entry()
+		lblConfidence = gtk.Label("Confidence:")
+		lblTaxonomyFile = gtk.Label("Taxonomy File:")
+		lblSeqFile = gtk.Label("Sequence File:")
+		lblMaxMemory = gtk.Label("Max Memory (MB):")
+		txtConfidence = gtk.Entry()
+		txtTaxonomyFile = gtk.Entry()
+		txtSeqFile = gtk.Entry()
+		txtMaxMemory = gtk.Entry()
 		self.widgetInfo.append((txtConfidence, "Entry", False, "confidence"))
 		self.widgetInfo.append((txtMaxMemory, "Entry", False, "maxmemory"))
 		self.widgetInfo.append((txtTaxonomyFile, "Entry", False, "taxfile"))
@@ -368,16 +393,16 @@ class Uchime(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
+		self.widgetContainer = gtk.Table(2,1)
 		label = "Do  chimera  checking  with  UCHIME. Since the parameters \
 vary based on the type of DNA, you can specify certain profile to be used."
-		lblProfile = Gtk.Label("Profile:")
-		cmbProfile = Gtk.ComboBoxText()
+		lblProfile = gtk.Label("Profile:")
+		cmbProfile = gtk.combo_box_new_text()
 		cmbProfile.append_text("v3-stringent")
 		cmbProfile.append_text("v3-relaxed")
 		self.widgetInfo.append((cmbProfile, "ComboBoxText", False, "profile"))
 		self.widgetContainer.attach(lblProfile, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbProfile, 1, 2, 0, 1, yoptions=Gtk.AttachOptions.SHRINK, xpadding=5, ypadding=5)
+		self.widgetContainer.attach(cmbProfile, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
 		return self.widgetContainer, label
 
 class UnifracMRPP(Analysis):
@@ -388,15 +413,15 @@ class UnifracMRPP(Analysis):
 		
 		
 	def construct_widgets(self):
-		self.widgetContainer = Gtk.Table(2,1)
+		self.widgetContainer = gtk.Table(2,1)
 		label = "Compute  Multi Response Permutation Procedure of \
 within-versus among-group dissimilarities in R using Unifrac \
 distances as provided by QIIME's beta diversity script. Library \
 is rarefied to the specified size, or if size is set to auto, \
 it will rarefy to the smallest sample size. If no size is \
 specified, no rarefaction will occur (which is probably wrong)."
-		lblSize = Gtk.Label("Size:")
-		txtSize = Gtk.Entry()
+		lblSize = gtk.Label("Size:")
+		txtSize = gtk.Entry()
 		self.widgetInfo.append((txtSize, "Entry", False, "size"))
 		self.widgetContainer.attach(lblSize, 0, 1, 0, 1, xpadding=5, ypadding=5)
 		self.widgetContainer.attach(txtSize, 1, 2, 0, 1, xpadding=5, ypadding=5)
@@ -458,9 +483,9 @@ def create_analysis(wm, analysis_string):
 	return container, label
 	
 def error_dialogue(label):
-	lblError = Gtk.Label(label)
-	dialog = Gtk.Dialog("AXIOME: Error", None, Gtk.DialogFlags.MODAL | \
-	Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_OK, Gtk.ResponseType.OK))
+	lblError = gtk.Label(label)
+	dialog = gtk.Dialog("AXIOME: Error", None, gtk.DIALOG_MODAL | \
+	gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_OK, gtk.RESPONSE_OK))
 	dialog.get_content_area().pack_start(lblError, True, True, 25)
 	lblError.show()
 	dialog.run()
@@ -511,7 +536,7 @@ class WindowManager(object):
 		
 	def on_btnMetadataRemove_clicked(self, treeview):
 		model = treeview.get_model()
-		selection = self.builder.get_object("metadata-selection")
+		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
 		model.remove(selectedrow)
 		
@@ -541,11 +566,12 @@ class WindowManager(object):
 		
 	def on_btnRemoveSource_clicked(self, treeview):
 		model = treeview.get_model()
-		selection = self.builder.get_object("source-files-selection")
+		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
 		model.remove(selectedrow)
 		
-	def on_btnEditSource_clicked(self, selection):
+	def on_btnEditSource_clicked(self, treeview):
+		selection = treeview.get_selection()
 		selected = selection.get_selected()
 		selectedrow = selected[1]
 		model = selected[0]
@@ -606,16 +632,16 @@ class WindowManager(object):
 			colindex = 0	
 			for row in metadatamodel:
 				colindex += 1
-				rend = Gtk.CellRendererText()
+				rend = gtk.CellRendererText()
 				rend.set_property("editable", True)
 				rend.connect("edited", self.on_sample_data_edited, colindex)
-				col = Gtk.TreeViewColumn(row[0], rend)
+				col = gtk.TreeViewColumn(row[0], rend)
 				col.add_attribute(rend, "text", colindex)
 				treeview.append_column(col)
 			filelist = self.builder.get_object("lstSourceInfo")
 			self.SampleData = list()
 			for filename in filelist:
-				self.SampleData.append(Gtk.ListStore(*[GObject.TYPE_STRING]*(colindex+1)))
+				self.SampleData.append(gtk.ListStore(*[gobject.TYPE_STRING]*(colindex+1)))
 			treeview.set_model(self.SampleData[0])
 			numfiles = len(filelist)
 			colHeader = self.builder.get_object("colID")
@@ -626,7 +652,7 @@ class WindowManager(object):
 			step3label.set_label("Step 3: Define Samples (File 1 of " + str(numfiles) + ")")
 			filenamelabel.set_label("Filename: " + filelist[0][1])
 			window.hide()
-			self.DefineSamples.show()
+			self.DefineSamples.show_all()
 		
 	### Format Definition Windows ###
 	
@@ -710,7 +736,7 @@ class WindowManager(object):
 		
 	def on_btnSampleRemove_clicked(self, treeview):
 		model = treeview.get_model()
-		selection = self.builder.get_object("selection-sample-id")
+		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
 		model.remove(selectedrow)
 		
@@ -811,11 +837,14 @@ class WindowManager(object):
 		
 	def on_btnAnalysisAdd_clicked(self, window):
 		self.builder.get_object("cmbAnalyses").set_active(-1)
+		window.resize(275,200)
+		width, height = window.get_size()
+		window.move((gtk.gdk.screen_width() - width)/2, (gtk.gdk.screen_height() - height)/2)
 		window.show()
 		
 	def on_btnAnalysisRemove_clicked(self, treeview):
 		model = treeview.get_model()
-		selection = self.builder.get_object("analysis-selection")
+		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
 		model.remove(selectedrow)
 		
@@ -832,6 +861,11 @@ class WindowManager(object):
 			box.reorder_child(container, 3)
 			container.show_all()
 		infolabel.set_text(label)
+		#Recenter window
+		window = self.builder.get_object("axiome_analysis_addition")
+		#width, height = window.get_size()
+		#window.move((gtk.gdk.screen_width() - width)/2, (gtk.gdk.screen_height() - height)/2)
+		window.resize(1,1)
 
 	def duplicate_analysis(self, analysis, model):
 		for row in model:
@@ -867,18 +901,18 @@ class WindowManager(object):
 		self.builder.get_object("spnNumCores").set_sensitive(checkbox.get_active())
 	
 	def on_btnLaunchSave_clicked(self, savedialog):
-		chooser = Gtk.FileChooserDialog(title="Save File",action=Gtk.FileChooserAction.SAVE, \
-			buttons=(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_SAVE,Gtk.ResponseType.OK))
-		chooser.set_default_response(Gtk.ResponseType.OK)
+		chooser = gtk.FileChooserDialog(title="Save File",action=gtk.FILE_CHOOSER_ACTION_SAVE, \
+			buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
+		chooser.set_default_response(gtk.RESPONSE_OK)
 		chooser.set_filter(self.builder.get_object("ftrAx"))
 		chooser.set_do_overwrite_confirmation(True)
 		response = chooser.run()
-		if response == Gtk.ResponseType.OK:
+		if response == gtk.RESPONSE_OK:
 			print chooser.get_filename(), 'selected'
 			self.save_session(chooser.get_filename())
 			chooser.destroy()
 			print "File saved! Exiting..."
-			Gtk.main_quit()
+			gtk.main_quit()
 		else:
 			chooser.destroy()
 		
@@ -934,7 +968,7 @@ class WindowManager(object):
 		def_list = self.builder.get_object("lstMetadata")
 		for row in def_list:
 			self.MetadataLabels.append(row[0])
-			self.XMLOutput += "\t<def name=\"" + row[0] + "\" type=\"" + row[1] + "\"/>\n"
+			self.XMLOutput += "\t<def name=\"" + row[0] + "\" type=\"" + row[1].lower()[0] + "\"/>\n"
 		self.XMLOutput += "\n"
 			
 	def add_samples(self):
@@ -978,34 +1012,34 @@ class WindowManager(object):
 		self.XMLOutput += "\n</axiome>"
 		
 	def save_session(self, filepath):
-		ax = Gio.File.new_for_path(filepath)
+		ax = gio.File(path=filepath)
 		self.add_axiome_tag()
 		self.add_definitions()
 		self.add_samples()
 		self.add_analyses()
-		ax.replace_contents(self.XMLOutput, None, False, Gio.FileCreateFlags.NONE, None)
+		ax.replace_contents(self.XMLOutput, None, False, gio.FILE_CREATE_NONE, None)
 		
 
 
 	### Generic ###
 		
 	def on_close(self, window, event=None):
-		lblError = Gtk.Label("Are you sure you want to quit?\nAll changes will be lost.")
-		lblError.set_justify(Gtk.Justification.CENTER)
-		dialog = Gtk.Dialog("AXIOME: Quit?", None, Gtk.DialogFlags.MODAL | \
-		Gtk.DialogFlags.DESTROY_WITH_PARENT, (Gtk.STOCK_YES, Gtk.ResponseType.YES, Gtk.STOCK_NO, Gtk.ResponseType.NO))
+		lblError = gtk.Label("Are you sure you want to quit?\nAll changes will be lost.")
+		lblError.set_justify(gtk.JUSTIFY_CENTER)
+		dialog = gtk.Dialog("AXIOME: Quit?", None, gtk.DIALOG_MODAL | \
+		gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO))
 		dialog.get_content_area().pack_start(lblError, True, True, 25)
 		lblError.show()
 		response = dialog.run()
 		dialog.destroy()
-		if response == Gtk.ResponseType.YES:
-			Gtk.main_quit()
+		if response == gtk.RESPONSE_YES:
+			gtk.main_quit()
 			return False
 		else:
 			return True
 		
 	def __init__(self):
-	    self.builder = Gtk.Builder()
+	    self.builder = gtk.Builder()
 	    self.builder.add_from_file(determine_path() + "/res/AxiomeUiWindow.ui")
 	    self.builder.connect_signals(self)
 	    self.mainWindow = self.builder.get_object("axiome_ui_window")
@@ -1024,7 +1058,7 @@ class WindowManager(object):
 	    
 def main():
 	mainWindow = WindowManager()
-	Gtk.main()
+	gtk.main()
 
 if __name__ == '__main__':
 	main()

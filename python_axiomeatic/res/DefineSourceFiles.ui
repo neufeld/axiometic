@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <!-- interface-requires gtk+ 3.0 -->
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="axiome_define_source_files">
     <property name="width_request">400</property>
     <property name="height_request">250</property>
@@ -9,25 +10,23 @@
     <property name="window_position">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkBox" id="box1">
+      <object class="GtkVBox" id="box1">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkLabel" id="lblStep2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="margin_left">10</property>
-            <property name="margin_top">5</property>
+            <property name="xalign">0.029999999329447746</property>
             <property name="label" translatable="yes">Step 2: Define Source Files</property>
             <attributes>
-              <attribute name="font-desc" value="Ubuntu Light 20"/>
+              <attribute name="scale" value="1.5"/>
             </attributes>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">3</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -35,8 +34,7 @@
           <object class="GtkImage" id="imgProgress2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="margin_left">10</property>
+            <property name="xalign">0.029999999329447746</property>
             <property name="pixbuf">step2.png</property>
             <property name="icon-size">1</property>
           </object>
@@ -56,11 +54,7 @@
               <object class="GtkTreeView" id="treSourceFiles">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="vexpand">True</property>
                 <property name="model">lstSourceInfo</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection" id="source-files-selection"/>
-                </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="colType">
                     <property name="title" translatable="yes">Type</property>
@@ -93,11 +87,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box2">
+          <object class="GtkHBox" id="box2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkButtonBox" id="buttonbox1">
+              <object class="GtkHButtonBox" id="buttonbox1">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">10</property>
@@ -105,7 +99,6 @@
                 <child>
                   <object class="GtkButton" id="btnAddSource">
                     <property name="label" translatable="yes">Add</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -121,7 +114,6 @@
                 <child>
                   <object class="GtkButton" id="btnRemoveSource">
                     <property name="label" translatable="yes">Remove</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -137,12 +129,11 @@
                 <child>
                   <object class="GtkButton" id="btnEditSource">
                     <property name="label" translatable="yes">Edit</property>
-                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
-                    <signal name="clicked" handler="on_btnEditSource_clicked" object="source-files-selection" swapped="no"/>
+                    <signal name="clicked" handler="on_btnEditSource_clicked" object="treSourceFiles" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -161,8 +152,7 @@
             <child>
               <object class="GtkButton" id="btnSourceNext">
                 <property name="label" translatable="yes">Next</property>
-                <property name="use_action_appearance">False</property>
-                <property name="width_request">75</property>
+                <property name="width_request">80</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -189,32 +179,29 @@
     </child>
   </object>
   <object class="GtkWindow" id="axiome_fasta">
-    <property name="width_request">400</property>
-    <property name="height_request">250</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AXIOME: FASTA File Configuration</property>
     <property name="window_position">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkBox" id="box5">
+      <object class="GtkVBox" id="box5">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox" id="box6">
+          <object class="GtkHBox" id="box6">
+            <property name="height_request">100</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="vexpand">True</property>
             <child>
               <object class="GtkLabel" id="lblFastaFilePath">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">10</property>
                 <property name="label" translatable="yes">Full File Path: </property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="padding">5</property>
                 <property name="position">0</property>
               </packing>
             </child>
@@ -222,15 +209,17 @@
               <object class="GtkEntry" id="txtFastaPath">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">10</property>
-                <property name="hexpand">True</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
-                <property name="expand">False</property>
+                <property name="expand">True</property>
                 <property name="fill">True</property>
+                <property name="padding">5</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -242,14 +231,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box7">
+          <object class="GtkHBox" id="box7">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_bottom">5</property>
             <child>
               <object class="GtkButton" id="btnFastaCancel">
                 <property name="label" translatable="yes">Cancel</property>
-                <property name="use_action_appearance">False</property>
                 <property name="width_request">75</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -267,14 +254,12 @@
             <child>
               <object class="GtkButton" id="btnFastaOK">
                 <property name="label" translatable="yes">OK</property>
-                <property name="use_action_appearance">False</property>
                 <property name="width_request">75</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">end</property>
                 <property name="use_action_appearance">False</property>
                 <signal name="clicked" handler="on_btnFastaOK_clicked" object="axiome_fasta" swapped="no"/>
               </object>
@@ -290,6 +275,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">10</property>
             <property name="position">1</property>
           </packing>
         </child>
@@ -298,26 +284,21 @@
   </object>
   <object class="GtkWindow" id="axiome_fastq_panda">
     <property name="can_focus">False</property>
-    <property name="hexpand">True</property>
-    <property name="vexpand">True</property>
     <property name="title" translatable="yes">AXIOME: PANDAseq Input Configuration</property>
     <property name="window_position">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkBox" id="boxFastqPanda">
+      <object class="GtkVBox" id="boxFastqPanda">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkGrid" id="grid1">
+          <object class="GtkTable" id="tblFastq">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
+            <property name="n_rows">3</property>
+            <property name="n_columns">4</property>
+            <property name="column_spacing">5</property>
             <property name="row_spacing">10</property>
-            <property name="column_spacing">10</property>
             <child>
               <object class="GtkLabel" id="lblFastqFwd">
                 <property name="visible">True</property>
@@ -326,10 +307,7 @@
                 <property name="use_markup">True</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="x_padding">5</property>
               </packing>
             </child>
             <child>
@@ -340,10 +318,9 @@
                 <property name="use_markup">True</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
                 <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="x_padding">5</property>
               </packing>
             </child>
             <child>
@@ -353,36 +330,33 @@
                 <property name="label" translatable="yes">Quality Threshold:</property>
               </object>
               <packing>
-                <property name="left_attach">0</property>
                 <property name="top_attach">2</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="bottom_attach">3</property>
+                <property name="x_padding">5</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="lblFastqFwdPrimer">
+              <object class="GtkLabel" id="lblFwdPrimer">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Forward Primer:</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="right_attach">3</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="lblFastqRevPrimer">
+              <object class="GtkLabel" id="lblRevPrimer">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Reverse Primer:</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
+                <property name="right_attach">3</property>
                 <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="bottom_attach">2</property>
               </packing>
             </child>
             <child>
@@ -390,44 +364,48 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">File Version:</property>
-                <attributes>
-                  <attribute name="foreground" value="#000000000000"/>
-                </attributes>
               </object>
               <packing>
                 <property name="left_attach">2</property>
+                <property name="right_attach">3</property>
                 <property name="top_attach">2</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="bottom_attach">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="cmbFastqVers">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="model">lstFastqVersions</property>
+                <child>
+                  <object class="GtkCellRendererText" id="cmbFastqRend"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="right_attach">4</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="y_options">GTK_SHRINK</property>
+                <property name="x_padding">5</property>
               </packing>
             </child>
             <child>
               <object class="GtkEntry" id="txtFastqFwd">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
                 <property name="invisible_char">•</property>
-                <signal name="changed" handler="on_txtFastqFwd_changed" swapped="no"/>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="txtFwdPrimer">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="hexpand">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">3</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="right_attach">2</property>
               </packing>
             </child>
             <child>
@@ -435,26 +413,16 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
-                <signal name="changed" handler="on_txtFastqRev_changed" swapped="no"/>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="txtRevPrimer">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-              </object>
-              <packing>
-                <property name="left_attach">3</property>
-                <property name="top_attach">1</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="bottom_attach">2</property>
               </packing>
             </child>
             <child>
@@ -462,42 +430,57 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
                 <property name="top_attach">2</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="bottom_attach">3</property>
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText" id="cmbFastqVers">
+              <object class="GtkEntry" id="txtRevPrimer">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="active">2</property>
-                <property name="entry_text_column">0</property>
-                <property name="id_column">1</property>
-                <property name="active_id">2</property>
-                <items>
-                  <item translatable="yes">1.3</item>
-                  <item translatable="yes">1.4</item>
-                  <item translatable="yes">1.5</item>
-                  <item translatable="yes">1.6</item>
-                  <item translatable="yes">1.7</item>
-                  <item translatable="yes">1.8</item>
-                </items>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">2</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
+                <property name="right_attach">4</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+                <property name="x_padding">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="txtFwdPrimer">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="invisible_char">•</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="right_attach">4</property>
+                <property name="x_padding">5</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="fill">True</property>
+            <property name="padding">5</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -505,17 +488,11 @@
           <object class="GtkExpander" id="expPanda">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="valign">start</property>
-            <property name="vexpand">True</property>
-            <property name="resize_toplevel">True</property>
             <child>
               <object class="GtkLabel" id="lblPandaInfo">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_left">5</property>
-                <property name="margin_right">5</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">5</property>
+                <property name="xpad">5</property>
                 <property name="label" translatable="yes">Forward and reverse file paths are required. Primers and quality threshold are optional.
 
 File Version refers to the version of the CASAVA pipeline that generated the sequences.
@@ -539,19 +516,18 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
+            <property name="padding">2</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box9">
+          <object class="GtkHBox" id="box9">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_bottom">5</property>
             <child>
               <object class="GtkButton" id="btnFastqCancel">
                 <property name="label" translatable="yes">Cancel</property>
-                <property name="use_action_appearance">False</property>
-                <property name="width_request">75</property>
+                <property name="width_request">80</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -568,8 +544,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
             <child>
               <object class="GtkButton" id="btnFastqOK">
                 <property name="label" translatable="yes">OK</property>
-                <property name="use_action_appearance">False</property>
-                <property name="width_request">75</property>
+                <property name="width_request">80</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -588,6 +563,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">5</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -595,40 +571,35 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
     </child>
   </object>
   <object class="GtkWindow" id="axiome_select_file_format">
-    <property name="width_request">400</property>
-    <property name="height_request">250</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">AXIOME: File Format Selection</property>
     <property name="window_position">center</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
-      <object class="GtkBox" id="box3">
+      <object class="GtkVBox" id="box3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkLabel" id="lblSelectFileFormat">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
-            <property name="margin_left">10</property>
-            <property name="margin_top">5</property>
+            <property name="xalign">0.029999999329447746</property>
             <property name="label" translatable="yes">Select File Format:</property>
             <attributes>
-              <attribute name="font-desc" value="Ubuntu Light 20"/>
+              <attribute name="scale" value="1.5"/>
             </attributes>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">5</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox" id="box4">
+          <object class="GtkHBox" id="box4">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="vexpand">True</property>
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkImage" id="imgFasta">
@@ -665,14 +636,13 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           </packing>
         </child>
         <child>
-          <object class="GtkButtonBox" id="buttonbox2">
+          <object class="GtkHButtonBox" id="buttonbox2">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">spread</property>
             <child>
               <object class="GtkButton" id="btnFasta">
                 <property name="label" translatable="yes">FASTA</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -688,7 +658,6 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
             <child>
               <object class="GtkButton" id="btnFastq">
                 <property name="label" translatable="yes">FASTQ (via PANDAseq)</property>
-                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -710,17 +679,29 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="btnFormatCancel">
-            <property name="label" translatable="yes">Cancel</property>
-            <property name="use_action_appearance">False</property>
-            <property name="width_request">75</property>
+          <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="halign">start</property>
-            <property name="margin_left">15</property>
-            <property name="use_action_appearance">False</property>
-            <signal name="clicked" handler="on_btnFormatCancel_clicked" object="axiome_select_file_format" swapped="no"/>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButton" id="btnFormatCancel">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="width_request">75</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="on_btnFormatCancel_clicked" object="axiome_select_file_format" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="padding">5</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -731,6 +712,32 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="lstFastqVersions">
+    <columns>
+      <!-- column-name Versions -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">1.3</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1.4</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1.5</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1.6</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1.7</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">1.8</col>
+      </row>
+    </data>
   </object>
   <object class="GtkListStore" id="lstSourceInfo">
     <columns>
