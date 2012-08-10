@@ -1038,7 +1038,7 @@ class WindowManager(object):
 		#First, check for multicore
 		if self.builder.get_object("chkMultiCore").get_active():
 			num_cores = self.builder.get_object("spnNumCores").get_value()
-			self.XMLOutput += "\t<multicore num-cores=\"" + str(num_cores) + "\"/>\n"
+			self.XMLOutput += "\t<multicore num-cores=\"" + str(int(num_cores)) + "\"/>\n"
 		for row in analysis_list:
 			self.XMLOutput += "\t<" + row[0] + row[1] + "/>\n"
 			
