@@ -1,0 +1,212 @@
+<plugins>
+	<alpha once="true">
+		<pipeline qiime="true" mothur="true">
+			<info>Perform an Alpha Diversity analysis (ie, QIIME's Chao1 curves). Will make use of multiple cores if the option is enabled.</info>
+		</pipeline>
+	</alpha>
+	<beta>
+		<pipeline qiime="true">
+			<info>Do a QIIME beta diversity analysis and produce biplots and bubble plots. QIIME normally uses summarised taxa for the  plots, so the taxonomic level can be specified; if it is omitted, OTUs are used instead.</info>
+			<input type="list" name="level" label="Level:">
+				<tooltip>Taxonomic level at which to do beta diversity plot (default: All OTUs)</tooltip>
+				<item>All</item>
+				<item>Life</item>
+				<item>Domain</item>
+				<item>Phylum</item>
+				<item>Class</item>
+				<item>Order</item>
+				<item>Family</item>
+				<item>Genus</item>
+				<item>Species</item>
+				<item>Strain</item>
+			</input>
+			<input type="string" name="size" label="Size:">
+				<tooltip>Rarefies library to specific size. 'auto' for smallest sample size. Default: none</tooltip>
+			</input>
+			<input type="integer" name="taxa" label="Taxa:">
+				<tooltip>Limits the number of taxa in biplot. Default: 10</tooltip>
+				<min>1</min>
+				<max>999999</max>
+				<default>10</default>
+			</input>
+			<input type="string" name="background" label="Background Colour:">
+				<tooltip>Plot background colour. Default: white</tooltip>
+				<default>white</default>
+			</input>
+		</pipeline>
+	</beta>
+	<blast once="true">
+		<pipeline qiime="true">
+			<info>Create a BLAST DB with the specified title, and using the specified blastdb creation command.</info>
+			<input type="string" name="title" label="Title:">
+				<tooltip>Title for BLAST DB file</tooltip>
+			</input>
+			<input type="list" name="command" label="Blast DB Command:">
+				<tooltip>BLAST DB creation command that is installed on your server</tooltip>
+				<item>formatdb</item>
+				<item>makeblastdb</item>
+			</input>
+		</pipeline>
+	</blast>
+	<compare once="true">
+		<pipeline qiime="true">
+			<info>Compare libraries at the specified taxonomic level.</info>
+			<input type="list" name="level" label="Level:" required="true">
+				<tooltip>Taxonomy level to compared</tooltip>
+				<item>Life</item>
+				<item>Domain</item>
+				<item>Phylum</item>
+				<item>Class</item>
+				<item>Order</item>
+				<item>Family</item>
+				<item>Genus</item>
+				<item>Species</item>
+				<item>Strain</item>
+			</input>
+		</pipeline>
+	</compare>
+	<duleg>
+		<pipeline qiime="true" mothur="true">
+			<info>Compute a Dufrene-Legendre indicator species analysis on numerical metadata fields. Uses the specified p-value as the cut-off to be included in the indicator species list.</info>
+			<input type="float" name="p" label="p Value:">
+				<tooltip>p value cutoff for analysis.</tooltip>
+				<min>0</min>
+				<max>1</max>
+				<precision>3</precision>
+				<default>0.05</default>
+			</input>
+		</pipeline>
+	</duleg>
+	<heatmap once="true">
+		<pipeline mothur="true" qiime="true">
+			<info>Create an OTU heatmap plot using QIIME.</info>
+		</pipeline>
+	</heatmap>
+	<jackknife>
+		<pipeline qiime="true">
+			<info>Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) of the OTU table using  QIIME's  jackknifed_beta_diversity.py script. Size parameter is optional must be a positive number no larger than the largest number of sequences in a sample.</info>
+			<input type="integer" name="size" label="Size:">
+				<tooltip>Number of sequences to subsample, per sample.</tooltip>
+				<min>1</min>
+				<max>999999</max>
+				<default>100</default>
+			</input>
+		</pipeline>
+	</jackknife>
+	<mrpp>
+		<pipeline mothur="true" qiime="true">
+			<info>Compute  Multi  Response  Permutation Procedure of within-versus among-group dissimilarities in R using the specified distance method.</info>
+			<input type="list" name="method" label="Distance Method:">
+				<tooltip>Distance method to use in calculations.</tooltip>
+				<item>manhattan</item>
+				<item>euclidean</item>
+				<item>canberra</item>
+				<item>bray</item>
+				<item>kulczynski</item>
+				<item>jaccard</item>
+				<item>gower</item>
+				<item>altGower</item>
+				<item>morisita</item>
+				<item>horn</item>
+				<item>mountford</item>
+				<item>raup</item>
+				<item>binomial</item>
+				<item>chao</item>
+				<item>cao</item>
+				<default>bray</default>
+			</input>
+		</pipeline>
+	</mrpp>
+	<nmf>
+		<pipeline mothur="true" qiime="true">
+			<info>Compute Non-negative Matrix Factorization of the data using bases equal to the specified degree parameter. An appropriate degree parameter can be obtained by analysing an NMF Concordance plot for local maxima.</info>
+			<input type="integer" name="degree" label="Degree:" required="true">
+				<tooltip>Degree for calculating NMF. Must be greater than or equal to 2, but less than or equal to 20.</tooltip>
+				<min>2</min>
+				<max>20</max>
+				<default>2</default>
+			</input>
+		</pipeline>
+	</nmf>
+	<nmf-concordance once="true">
+		<pipeline mothur="true" qiime="true">
+			<info>Compute a concordance plot of the data for use in determining an appropriate degree value to create an NMF plot. The local maxima of the concordance plot are appropriate to be used as the degree parameter of an NMF analysis.</info>
+		</pipeline>
+	</nmf-concordance>
+	<nmf-auto once="true">
+		<pipeline mothur="true" qiime="true">
+			<info>Compute a concordance plot, and automatically search it for local maxima, and then run an NMF analysis on each one. Note that this will run an NMF analysis on all local maxima, which is potentially computationally expensive and time consuming.</info>
+		</pipeline>
+	</nmf-auto>
+	<pcoa>
+		<pipeline mothur="true" qiime="true">
+			<info>Create a 2D principal coordinate analysis plot using the two most significant dimensions. Plots an MDS plot, and if there is more than 1 numerical metadata field, a biplot will be created. Uses the specified distance method, and colours described in the "Colour" field of the metadata.</info>
+			<input type="list" name="method" label="Distance Method:">
+				<tooltip>Distance method used in calculations</tooltip>
+				<item>manhattan</item>
+				<item>euclidean</item>
+				<item>canberra</item>
+				<item>bray</item>
+				<item>kulczynski</item>
+				<item>jaccard</item>
+				<item>gower</item>
+				<item>altGower</item>
+				<item>morisita</item>
+				<item>horn</item>
+				<item>mountford</item>
+				<item>raup</item>
+				<item>binomial</item>
+				<item>chao</item>
+				<item>cao</item>
+				<default>bray</default>
+			</input>
+		</pipeline>
+	</pcoa>
+	<rankabundance once="true">
+		<pipeline qiime="true">
+			<info>Create a rank-abundance plot using QIIME.</info>
+		</pipeline>
+	</rankabundance>
+	<rdp once="true">
+		<pipeline qiime="true">
+			<info>Change the parameters used for RDP classification. Confidence value is a numeric value between 0 and 1, where the default is 0.8 (for short reads, 0.5 is recommended). The taxonomy file and sequence file are specified only if you wish to use your own database for classification, otherwise it defaults to your configured QIIME default. The max memory (MB) value should be set to a higher value if using a custom database to prevent RDP from running out of memory (default is 1000).</info>
+			<input type="float" name="confidence" label="Confidence:">
+				<min>0</min>
+				<max>1</max>
+				<precision>2</precision>
+				<default>0.8</default>
+			</input>
+			<input type="string" name="taxfile" label="Taxonomy File:"/>
+			<input type="string" name="seqfile" label="Sequence File:"/>
+			<input type="integer" name="maxmemory" label="Max Memory:">
+				<min>1</min>
+				<max>999999</max>
+				<default>1000</default>
+			</input>
+		</pipeline>
+	</rdp>
+	<taxaplot once="true">
+		<pipeline qiime="true" mothur="true">
+			<info>Make bar and area charts of the taxa using QIIME.</info>
+		</pipeline>
+	</taxaplot>
+	<uchime once="true">
+		<pipeline qiime="true">
+			<info>Do  chimera  checking  with  UCHIME. Since the parameters vary based on the type of DNA, you can specify certain profile to be used.</info>
+			<input type="list" name="profile" label="Profile:" required="true">
+				<tooltip>Profile to be used by UCHIME.</tooltip>
+				<item>v3-stringent</item>
+				<item>v3-relaxed</item>
+			</input>
+		</pipeline>
+	</uchime>
+	<unifrac-mrpp once="true">
+		<pipeline qiime="true">
+			<info>Compute  Multi Response Permutation Procedure of within-versus among-group dissimilarities in R using Unifrac distances as provided by QIIME's beta diversity script. Library is rarefied to the specified size, or if size is set to auto, it will rarefy to the smallest sample size. If no size is specified, no rarefaction will occur (which is probably wrong).</info>
+			<input type="string" name="size" label="Size:">
+				<tooltip>Size to rarefy library to.</tooltip>
+				<default>auto</default>
+			</input>
+		</pipeline>
+	</unifrac-mrpp>
+</plugins>

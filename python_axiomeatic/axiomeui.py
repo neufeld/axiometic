@@ -20,14 +20,206 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
 #  
-#  
-
-#TODO: Catch errors when removing and no selection
+#
 
 import pygtk, os, sys
 pygtk.require("2.0")
 import gtk, gobject, gio
-#from gi.repository import Gtk, gobject, Gio
+from xml.dom.minidom import parse
+
+class XMLFile:
+	def __init__(self, path):
+		self.File = parse(path)
+		
+	def getNextSibling(node):
+		if (node.nextSibling != None):
+			return node.nextSibling
+		else:
+			return None
+		
+class analysisDefs(XMLFile):
+	
+	def getAnalysisList(self):
+		pipe_analysis_dict = {}
+		#Skip the outermost <plugin> tag, go in to the plugins
+		node = self.File.firstChild.firstChild
+		while node != None:
+			if node.nodeType == 1:
+				for element in node.getElementsByTagName("pipeline"):
+					attribs = element.attributes
+					if attribs != None:
+						for i in range(0, attribs.length):
+							pipeline = attribs.item(i).name
+							logical = attribs.item(i).value
+							if logical.lower() == "true":
+								if not(pipe_analysis_dict.has_key(pipeline)):
+									pipe_analysis_dict[pipeline]=list()
+								pipe_analysis_dict[pipeline].append(node.nodeName)
+			node = node.nextSibling
+		return pipe_analysis_dict
+		
+	def __init__(self, path):
+		XMLFile.__init__(self, path)
+		self.pipe_analysis_dict = self.getAnalysisList()
+		self.currentWidgets = None
+	
+	def analysis_node_search(self, analysis):
+		elems = self.File.getElementsByTagName(analysis)
+		if elems.length > 1:
+			print "ERROR: More than one definition for analysis \"" + analysis + "\" found in plugin_defs.xml. Using first definition in file."
+		elif elems.length == 0:
+			print "ERROR: Analysis \"" + str(analysis) + "\" not found. Please check plugin_defs.xml."
+		node = elems.item(0)
+		return node
+		
+	def pipeline_node_search(self, analysis, pipeline):
+		node = self.analysis_node_search(analysis)
+		#Look for the pipeline definition for the analysis
+		pipenodelist = node.getElementsByTagName("pipeline")
+		for i in range(0, pipenodelist.length):
+			if pipenodelist.item(i).hasAttribute(pipeline):
+				pipenode = pipenodelist.item(i)
+		return pipenode
+		
+	def is_only_once(self, analysis, pipeline):
+		analysisnode = self.analysis_node_search(analysis)
+		once = analysisnode.getAttribute("once")
+		if once.lower() == "true":
+			return True
+		else:
+			return False
+		
+	def createListWidget(self, node):
+		box = gtk.HBox()
+		labeltext = node.getAttribute("label")
+		label = gtk.Label(labeltext)
+		box.pack_start(label)
+		combo = gtk.combo_box_new_text()
+		itemnodes = node.getElementsByTagName("item")
+		defaultnodes = node.getElementsByTagName("default")
+		if defaultnodes.length != 0:
+			default = defaultnodes.item(0).firstChild.nodeValue
+		else:
+			default = None
+		for i in range(0, itemnodes.length):
+			itemtext = itemnodes.item(i).firstChild.nodeValue
+			combo.append_text(itemtext)
+			if itemtext == default:
+				combo.set_active(i)
+		box.pack_start(combo)
+		return box, combo, label
+		
+	def createEntryWidget(self, node):
+		box = gtk.HBox()
+		labeltext = node.getAttribute("label")
+		label = gtk.Label(labeltext)
+		box.pack_start(label)
+		entry = gtk.Entry()
+		defaultnodes = node.getElementsByTagName("default")
+		if defaultnodes.length != 0:
+			default = defaultnodes.item(0).firstChild.nodeValue
+			entry.set_text(default)
+		box.pack_start(entry)
+		return box, entry, label
+		
+	def createFloatWidget(self, node):
+		box = gtk.HBox()
+		labeltext = node.getAttribute("label")
+		label = gtk.Label(labeltext)
+		box.pack_start(label)
+		defaultnodes = node.getElementsByTagName("default")
+		if defaultnodes.length == 1:
+			default = float(defaultnodes.item(0).firstChild.nodeValue)
+		minnodes = node.getElementsByTagName("min")
+		if minnodes.length == 1:
+			minnum = float(minnodes.item(0).firstChild.nodeValue)
+		maxnodes = node.getElementsByTagName("max")
+		if maxnodes.length == 1:
+			maxnum = float(maxnodes.item(0).firstChild.nodeValue)
+		precisionnodes = node.getElementsByTagName("precision")
+		if precisionnodes.length == 1:
+			precision = int(precisionnodes.item(0).firstChild.nodeValue)
+			if precision == 0:
+				precision = 2
+		adjust = gtk.Adjustment(default, minnum, maxnum, pow(10, -(precision)))
+		spinner = gtk.SpinButton(adjust, climb_rate=1, digits=precision)
+		box.pack_start(spinner)
+		return box, spinner, label
+		
+	def createIntWidget(self, node):
+		box = gtk.HBox()
+		labeltext = node.getAttribute("label")
+		label = gtk.Label(labeltext)
+		box.pack_start(label)
+		defaultnodes = node.getElementsByTagName("default")
+		if defaultnodes.length == 1:
+			default = int(defaultnodes.item(0).firstChild.nodeValue)
+		minnodes = node.getElementsByTagName("min")
+		if minnodes.length == 1:
+			minnum = int(minnodes.item(0).firstChild.nodeValue)
+		maxnodes = node.getElementsByTagName("max")
+		if maxnodes.length == 1:
+			maxnum = int(maxnodes.item(0).firstChild.nodeValue)
+		precisionnodes = node.getElementsByTagName("precision")
+		if precisionnodes.length == 1:
+			precision = int(precisionnodes.item(0).firstChild.nodeValue)
+			if precision == 0:
+				precision = 2
+		adjust = gtk.Adjustment(default, minnum, maxnum, 1)
+		spinner = gtk.SpinButton(adjust, climb_rate=1)
+		box.pack_start(spinner)
+		return box, spinner, label
+		
+	def getWidget(self, analysis, pipeline):
+		pipenode = self.pipeline_node_search(analysis, pipeline)
+		#Get the info label
+		infonodelist = pipenode.getElementsByTagName("info")
+		if infonodelist.length != 1:
+			print "ERROR: " + infonodelist.length + " info definitions found for plugin " + analysis + " with pipeline " + pipeline + ". Should only be one."
+		else:
+			labeltext = infonodelist.item(0).firstChild.nodeValue
+		#Set up a VBox to put all of these widgets in
+		mainBox = gtk.VBox()
+		#Get the inputs required for the analysis
+		inputnodelist = pipenode.getElementsByTagName("input")
+		info = list()
+		for i in range(0, inputnodelist.length):
+			intype = inputnodelist.item(i).getAttribute("type")
+			requiredtext = inputnodelist.item(i).getAttribute("required")
+			if requiredtext.lower() == "true":
+				required = True
+			else:
+				required = False
+			name = inputnodelist.item(i).getAttribute("name")
+			if intype == "list":
+				box, widget, label = self.createListWidget(inputnodelist.item(i))
+				widgettype = "ComboBoxText"
+			elif intype == "string":
+				box, widget, label = self.createEntryWidget(inputnodelist.item(i))
+				widgettype = "Entry"
+			elif intype == "float":
+				box, widget, label = self.createFloatWidget(inputnodelist.item(i))
+				widgettype = "SpinnerFloat"
+			elif intype == "integer":
+				box, widget, label = self.createIntWidget(inputnodelist.item(i))
+				widgettype = "SpinnerInt"
+			else:
+				print "ERROR: Unrecognized input type \"" + intype + "\"."
+				widget = None
+			tooltiplist = inputnodelist.item(i).getElementsByTagName("tooltip")
+			if tooltiplist.length == 1:
+				tooltiptext = tooltiplist.item(0).firstChild.nodeValue
+				label.set_tooltip_text(tooltiptext)
+			if required:
+				label.set_text("<span color=\"#FF0000\">" + label.get_text() + "</span>")
+				label.set_use_markup(True)
+			info.append((widget, widgettype, required, name))
+			mainBox.set_border_width(15)
+			mainBox.pack_start(box)
+			
+		return labeltext, mainBox, info
+
+
 
 def determine_path():
     """Borrowed from wxglade.py"""
@@ -40,447 +232,6 @@ def determine_path():
         print "I'm sorry, but something is wrong."
         print "There is no __file__ variable. Please contact the author."
         sys.exit()
-
-class Analysis:
-	def __init__(self):
-		#Widget info consists of a four-tuple, with 
-		#( widget, type (str), required (bool), xml parameter name (str) ) 
-		self.widgetInfo = list()
-		self.widgetContainer = None
-		self.once = False
-		self.XMLName = None
-		
-	def is_only_once(self):
-		return self.once
-		
-	def required_fields_empty(self):
-		#Go through each widget, and, if required, check widget is
-		#not empty, using appropriate check for the type
-		for widget in self.widgetInfo:
-			if ( widget[2] ):
-				if ( widget[1] == "Entry" ):
-					if ( widget[0].get_text() == "" ):
-						return True
-				elif ( widget[1] == "ComboBoxText" ):
-					if  ( widget[0].get_active_text() == "" ) | ( widget[0].get_active_text() == None ):
-						return True
-		return False
-		
-	def get_xml_name(self):
-		return self.XMLName
-		
-	def get_parameter_string(self):
-		parameters = ""
-		for widget in self.widgetInfo:
-			if ( widget[1] == "Entry" ):
-				if ( ( widget[0].get_text() != "" ) & ( widget[0].get_text() != None ) ):
-					parameters += " " +  widget[3] + "=\"" + widget[0].get_text() + "\""
-			elif ( widget[1] == "ComboBoxText" ):
-				if ( ( widget[0].get_active_text() != "" ) & ( widget[0].get_active_text() != None ) ):
-					parameters += " " +  widget[3] + "=\"" + widget[0].get_active_text() + "\""
-		return parameters
-		
-class AlphaDiv(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "alpha"
-		
-		
-	def construct_widgets(self):
-		#No widgets required
-		label = "Perform an Alpha Diversity analysis (ie, QIIME's Chao1 curves).\n \
-		Will make use of multiple cores if the option is enabled."
-		return self.widgetContainer, label
-		
-class BetaDiv(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.XMLName = "beta"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(4, 2)
-		label = "Do a QIIME beta diversity analysis and produce biplots and bubble plots.\n\n\
-QIIME normally uses summarised taxa for the  plots, so the taxonomic level can \
-be specified; if it is omitted, OTUs are used instead."
-		lblLevel = gtk.Label("Level:")
-		lblSize = gtk.Label("Size:")
-		lblSize.set_tooltip_text("Rarefies library to specific size. 'auto' for smallest sample size. Default: none")
-		lblTaxa = gtk.Label("Taxa:")
-		lblTaxa.set_tooltip_text("Limits the number of taxa in biplot. Default: 10")
-		lblBackground = gtk.Label("Background Colour:")
-		lblBackground.set_tooltip_text("Plot background colour. Default: white")
-		levelList = [ "All", "Life", "Domain", "Phylum", "Class", "Order", "Family", "Genus", \
-		"Species", "Strain" ]
-		cmbLevel = gtk.combo_box_new_text()
-		for level in levelList:
-			cmbLevel.append_text(level)
-		txtSize = gtk.Entry()
-		txtTaxa = gtk.Entry()
-		txtBackground = gtk.Entry()
-		self.widgetInfo.append((cmbLevel, "ComboBoxText", False, "level"))
-		self.widgetInfo.append((txtSize, "Entry", False, "size"))
-		self.widgetInfo.append((txtTaxa, "Entry", False, "taxa"))
-		self.widgetInfo.append((txtBackground, "Entry", False, "background"))
-		self.widgetContainer.attach(lblLevel, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbLevel, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblSize, 2, 3, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtSize, 3, 4, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblTaxa, 0, 1, 1, 2, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtTaxa, 1, 2, 1, 2, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblBackground, 2, 3, 1, 2, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtBackground, 3, 4, 1, 2, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-		
-class BLAST(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "blast"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(4, 1)
-		label = "Create a BLAST DB with the specified title, and using the \
-specified blastdb creation command."
-		lblTitle = gtk.Label("Title:")
-		lblDBCmd = gtk.Label("BLAST DB Command:")
-		txtTitle = gtk.Entry()
-		cmbDBCmd = gtk.combo_box_new_text()
-		cmbDBCmd.append_text("formatdb")
-		cmbDBCmd.append_text("makeblastdb")
-		self.widgetInfo.append((txtTitle, "Entry", False, "title"))
-		self.widgetInfo.append((cmbDBCmd, "ComboBoxText", False, "command"))
-		self.widgetContainer.attach(lblTitle, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtTitle, 1, 2, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblDBCmd, 2, 3, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbDBCmd, 3, 4, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class CompareLibs(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "compare"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Compare libraries at the specified taxonomic level."
-		lblLevel = gtk.Label("<span color=\"#FF0000\">Level:</span>")
-		lblLevel.set_use_markup(True)
-		levelList = [ "Life", "Domain", "Phylum", "Class", "Order", "Family", "Genus", \
-		"Species", "Strain" ]
-		cmbLevel = gtk.combo_box_new_text()
-		for level in levelList:
-			cmbLevel.append_text(level)
-		self.widgetInfo.append((cmbLevel, "ComboBoxText", True, "level"))
-		self.widgetContainer.attach(lblLevel, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbLevel, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class Duleg(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.XMLName = "duleg"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Compute a Dufrene-Legendre indicator species analysis on numerical \
-metadata fields. Uses the specified p-value as the cut-off to be included in \
-the indicator species list."
-		lblPVal = gtk.Label("p Value:")
-		txtPVal = gtk.Entry()
-		self.widgetInfo.append((txtPVal, "Entry", False, "p"))
-		self.widgetContainer.attach(lblPVal, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtPVal, 1, 2, 0, 1, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class Heatmap(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "heatmap"
-		
-		
-	def construct_widgets(self):
-		#No widgets required
-		label = "Create an OTU heatmap plot using QIIME."
-		return self.widgetContainer, label
-
-class Jackknife(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.XMLName = "jackknife"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Create 2D and 3D PCoA plots based on jackknifing (repeated subsampling) \
-of the OTU table using  QIIME's  jackknifed_beta_diversity.py script. Size \
-parameter is optional must be a positive number no larger than the largest \
-number of sequences in a sample."
-		lblSize = gtk.Label("Size:")
-		txtSize = gtk.Entry()
-		self.widgetInfo.append((txtSize, "Entry", False, "size"))
-		self.widgetContainer.attach(lblSize, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtSize, 1, 2, 0, 1, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class MRPP(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.XMLName = "mrpp"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Compute  Multi  Response  Permutation Procedure of within-versus \
-among-group dissimilarities in R using the specified distance method."
-		distancemethods = [ "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford",  "raup", \
-		"binomial", "chao", "cao" ]
-		lblDistance = gtk.Label("Distance Method:")
-		cmbDistance = gtk.combo_box_new_text()
-		for method in distancemethods:
-			cmbDistance.append_text(method)
-		self.widgetInfo.append((cmbDistance, "ComboBoxText", False, "method"))
-		self.widgetContainer.attach(lblDistance, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbDistance, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class NMF(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.XMLName = "nmf"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Compute Non-negative Matrix Factorization of the data using bases \
-equal to the specified degree parameter. An appropriate degree parameter \
-can be obtained by analysing an NMF Concordance plot for local maxima. \
-Degree must be greater than 2, but less than 20."
-		lblDegree = gtk.Label("<span color=\"#FF0000\">Degree:</span>")
-		lblDegree.set_use_markup(True)
-		txtDegree = gtk.Entry()
-		self.widgetInfo.append((txtDegree, "Entry", True, "degree"))
-		self.widgetContainer.attach(lblDegree, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtDegree, 1, 2, 0, 1, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-		
-class NMFConcordance(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "nmf-concordance"
-		
-		
-	def construct_widgets(self):
-		#No widgets required
-		label = "Compute a concordance plot of the data for use in determining an \
-appropriate degree value to create an NMF plot. The local maxima of the \
-concordance plot are appropriate to be used as the degree parameter of an \
-NMF analysis."
-		return self.widgetContainer, label
-		
-class NMFAuto(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "nmf-auto"
-		
-		
-	def construct_widgets(self):
-		#No widgets required
-		label = "Compute a concordance plot, and automatically search it for local maxima, \
-and then run an NMF analysis on each one. Note that this will run an NMF analysis \
-on all local maxima, which is potentially computationally expensive and time consuming."
-		return self.widgetContainer, label
-
-class PCoA(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.XMLName = "pcoa"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Create a 2D principal coordinate analysis plot using the two most \
-significant dimensions. Plots an MDS plot, and if there is more than 1 numerical \
-metadata field, a biplot will be created. Uses the specified distance method, \
-and colours described in the \"Colour\" field of the metadata."
-		distancemethods = [ "manhattan", "euclidean", "canberra", "bray", "kulczynski", "jaccard", "gower", "altGower", "morisita", "horn", "mountford",  "raup", \
-		"binomial", "chao", "cao" ]
-		lblDistance = gtk.Label("Distance Method:")
-		cmbDistance = gtk.combo_box_new_text()
-		for method in distancemethods:
-			cmbDistance.append_text(method)
-		self.widgetInfo.append((cmbDistance, "ComboBoxText", False, "method"))
-		self.widgetContainer.attach(lblDistance, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbDistance, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class RankAbundance(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "rankabundance"
-		
-		
-	def construct_widgets(self):
-		#No widgets required
-		label = "Create a rank-abundance plot using QIIME."
-		return self.widgetContainer, label
-
-class RDP(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "rdp"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(4,2)
-		label = "Change the parameters used for RDP classification. \
-Confidence value is a numeric value between 0 and 1, where the \
-default is 0.8 (for short reads, 0.5 is recommended). The \
-taxonomy file and sequence file are specified only if you wish \
-to use your own database for classification, otherwise it \
-defaults to your configured QIIME default. The max memory (MB) value \
-should be set to a higher value if using a custom database to prevent \
-RDP from running out of memory (default is 1000)."
-		lblConfidence = gtk.Label("Confidence:")
-		lblTaxonomyFile = gtk.Label("Taxonomy File:")
-		lblSeqFile = gtk.Label("Sequence File:")
-		lblMaxMemory = gtk.Label("Max Memory (MB):")
-		txtConfidence = gtk.Entry()
-		txtTaxonomyFile = gtk.Entry()
-		txtSeqFile = gtk.Entry()
-		txtMaxMemory = gtk.Entry()
-		self.widgetInfo.append((txtConfidence, "Entry", False, "confidence"))
-		self.widgetInfo.append((txtMaxMemory, "Entry", False, "maxmemory"))
-		self.widgetInfo.append((txtTaxonomyFile, "Entry", False, "taxfile"))
-		self.widgetInfo.append((txtSeqFile, "Entry", False, "seqfile"))
-		self.widgetContainer.attach(lblConfidence, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtConfidence, 1, 2, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblMaxMemory, 2, 3, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtMaxMemory, 3, 4, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblTaxonomyFile, 0, 1, 1, 2, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtTaxonomyFile, 1, 2, 1, 2, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(lblSeqFile, 2, 3, 1, 2, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtSeqFile, 3, 4, 1, 2, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class TaxaPlot(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "taxaplot"
-		
-		
-	def construct_widgets(self):
-		#No widgets required
-		label = "Make bar and area charts of the taxa using QIIME."
-		return self.widgetContainer, label
-
-class Uchime(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "uchime"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Do  chimera  checking  with  UCHIME. Since the parameters \
-vary based on the type of DNA, you can specify certain profile to be used."
-		lblProfile = gtk.Label("Profile:")
-		cmbProfile = gtk.combo_box_new_text()
-		cmbProfile.append_text("v3-stringent")
-		cmbProfile.append_text("v3-relaxed")
-		self.widgetInfo.append((cmbProfile, "ComboBoxText", False, "profile"))
-		self.widgetContainer.attach(lblProfile, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(cmbProfile, 1, 2, 0, 1, yoptions=gtk.SHRINK, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-
-class UnifracMRPP(Analysis):
-	def __init__(self):
-		Analysis.__init__(self)
-		self.once = True
-		self.XMLName = "unifrac-mrpp"
-		
-		
-	def construct_widgets(self):
-		self.widgetContainer = gtk.Table(2,1)
-		label = "Compute  Multi Response Permutation Procedure of \
-within-versus among-group dissimilarities in R using Unifrac \
-distances as provided by QIIME's beta diversity script. Library \
-is rarefied to the specified size, or if size is set to auto, \
-it will rarefy to the smallest sample size. If no size is \
-specified, no rarefaction will occur (which is probably wrong)."
-		lblSize = gtk.Label("Size:")
-		txtSize = gtk.Entry()
-		self.widgetInfo.append((txtSize, "Entry", False, "size"))
-		self.widgetContainer.attach(lblSize, 0, 1, 0, 1, xpadding=5, ypadding=5)
-		self.widgetContainer.attach(txtSize, 1, 2, 0, 1, xpadding=5, ypadding=5)
-		return self.widgetContainer, label
-	
-def create_analysis(wm, analysis_string):
-	### This function is given a string containing the analysis name
-	# it returns a container widget containing all of the necesarry
-	# widgets to collect properties for the analysis, and a string that
-	# describes the analysis and its properties
-	
-	if ( analysis_string == "Alpha Diversity"):
-		analysis = AlphaDiv()
-	elif ( analysis_string == "Beta Diversity"):
-		analysis = BetaDiv()
-	elif ( analysis_string == "BLAST DB Creation" ):
-		analysis = BLAST()
-	elif ( analysis_string == "Compare Libraries" ):
-		analysis = CompareLibs()
-	elif ( analysis_string == "Indicator Species" ):
-		analysis = Duleg()
-	elif ( analysis_string == "Heatmap" ):
-		analysis = Heatmap()
-	elif ( analysis_string == "Jackknifed Beta Diversity" ):
-		analysis = Jackknife()
-	elif ( analysis_string == "MRPP" ):
-		analysis = MRPP()
-	elif ( analysis_string == "NMF"):
-		analysis = NMF()
-	elif ( analysis_string == "NMF Concordance"):
-		analysis = NMFConcordance()
-	elif ( analysis_string == "NMF Auto"):
-		analysis = NMFAuto()
-	elif ( analysis_string == "PCoA"):
-		analysis = PCoA()
-	elif ( analysis_string == "Rank Abundance Curve" ):
-		analysis = RankAbundance()
-	elif ( analysis_string == "RDP Configuration" ):
-		analysis = RDP()
-	elif ( analysis_string == "Taxonomy Plot" ):
-		analysis = TaxaPlot()
-	elif ( analysis_string == "Uchime Chimera Analysis" ):
-		analysis = Uchime()
-	elif ( analysis_string == "Unifrac MRPP" ):
-		analysis = UnifracMRPP()
-	else:
-		analysis = None
-		
-	if ( analysis == None ):
-		container = None
-		label = "Select an analysis from the dropdown."
-	else:
-		wm.ConstructedAnalysis = analysis
-		container, label = analysis.construct_widgets()
-	
-	if ( container != None ):
-		container.set_border_width(10)
-		
-	return container, label
 	
 def error_dialogue(label):
 	lblError = gtk.Label(label)
@@ -813,6 +564,9 @@ class WindowManager(object):
 					cmbQAlign.set_active(2)
 					cmbQPhylo.set_active(0)
 					cmbMOTU.set_active(0)
+					cmbPipeline.get_model().clear()
+					for key in self.pluginDefs.pipe_analysis_dict:
+						cmbPipeline.append_text(key)
 					cmbPipeline.set_active(0)
 				self.DefineSamples.hide()
 				self.DefineAnalyses.show()
@@ -824,24 +578,17 @@ class WindowManager(object):
 		#if self.PipelineContainer != None:
 			#box.remove(self.PipelineContainer)
 		cmbAnalyses = self.builder.get_object("cmbAnalyses")
-		if widget.get_active_text() == "QIIME":
-			qiimeanalyses = ["Alpha Diversity", "Beta Diversity", "BLAST DB Creation", \
-			"Compare Libraries", "Heatmap", "Indicator Species", "Jackknifed Beta Diversity", \
-			"MRPP", "NMF", "NMF Concordance", "NMF Auto", "PCoA", "Rank Abundance Curve", \
-			"RDP Configuration", "Taxonomy Plot", "Uchime Chimera Analysis", "Unifrac MRPP"]
+		if widget.get_active_text() != None:
+			analyses = self.pluginDefs.pipe_analysis_dict[widget.get_active_text()]
 			cmbAnalyses.get_model().clear()
-			for analysis in qiimeanalyses:
+			for analysis in analyses:
 				cmbAnalyses.append_text(analysis)
-			self.builder.get_object("grdMothur").set_visible(False)
-			self.builder.get_object("grdQIIME").set_visible(True)
-		elif widget.get_active_text() == "mothur":
-			mothuranalyses = ["Alpha Diversity", "Indicator Species", "MRPP", \
-			"NMF", "NMF Concordance", "NMF Auto", "PCoA", "Taxonomy Plot"]
-			cmbAnalyses.get_model().clear()
-			for analysis in mothuranalyses:
-				cmbAnalyses.append_text(analysis)
-			self.builder.get_object("grdMothur").set_visible(True)
-			self.builder.get_object("grdQIIME").set_visible(False)
+			if widget.get_active_text() == "qiime":
+				self.builder.get_object("grdMothur").set_visible(False)
+				self.builder.get_object("grdQIIME").set_visible(True)
+			elif widget.get_active_text() == "mothur":
+				self.builder.get_object("grdMothur").set_visible(True)
+				self.builder.get_object("grdQIIME").set_visible(False)
 	
 	def on_cmbQOTU_changed(self, widget):
 		txtQOTURefSeqs = self.builder.get_object("txtQOTURefSeqs")
@@ -880,46 +627,84 @@ class WindowManager(object):
 	def on_cmbAnalyses_changed(self, box):
 		if (self.PropContainer != None):
 			box.remove(self.PropContainer)
-		combo = self.builder.get_object("cmbAnalyses")
+		cmbAnalyses = self.builder.get_object("cmbAnalyses")
 		infolabel = self.builder.get_object("lblAnalInfo")
-		box2 = self.builder.get_object("boxAnalysisMain")
-		container, label = create_analysis(self, combo.get_active_text())
-		self.PropContainer = container
-		if (container != None):
-			box.pack_start(container, True, True, 0)
-			box.reorder_child(container, 3)
-			container.show_all()
-		infolabel.set_text(label)
-		#Recenter window
-		window = self.builder.get_object("axiome_analysis_addition")
-		#width, height = window.get_size()
-		#window.move((gtk.gdk.screen_width() - width)/2, (gtk.gdk.screen_height() - height)/2)
-		window.resize(1,1)
+		if cmbAnalyses.get_active_text() != None:
+			cmbPipeline = self.builder.get_object("cmbPipeline")
+			box2 = self.builder.get_object("boxAnalysisMain")
+			label, container, info = self.pluginDefs.getWidget(cmbAnalyses.get_active_text(), cmbPipeline.get_active_text())
+			self.ConstructedAnalysisInfo = info
+			self.PropContainer = container
+			if (container != None):
+				box.pack_start(container, True, True, 0)
+				box.reorder_child(container, 3)
+				container.show_all()
+			infolabel.set_text(label)
+			#Recenter window
+			window = self.builder.get_object("axiome_analysis_addition")
+			#width, height = window.get_size()
+			#window.move((gtk.gdk.screen_width() - width)/2, (gtk.gdk.screen_height() - height)/2)
+			window.resize(1,1)
+		else:
+			infolabel.set_text("Select an analysis from the dropdown.")
 
 	def duplicate_analysis(self, analysis, model):
 		for row in model:
 			if (row[0] == analysis):
 				return True
 		return False
-
+	
+	def required_analysis_fields_empty(self):
+		#Go through each widget, and, if required, check widget is
+		#not empty, using appropriate check for the type
+		for widget in self.ConstructedAnalysisInfo:
+			if ( widget[2] ):
+				if ( widget[1] == "Entry" ):
+					if ( widget[0].get_text() == "" ):
+						return True
+				elif ( widget[1] == "ComboBoxText" ):
+					if  ( widget[0].get_active_text() == "" ) | ( widget[0].get_active_text() == None ):
+						return True
+		return False
+		
+	def get_analysis_parameter_string(self):
+		parameters = ""
+		for widget in self.ConstructedAnalysisInfo:
+			if ( widget[1] == "Entry" ):
+				if ( ( widget[0].get_text() != "" ) & ( widget[0].get_text() != None ) ):
+					parameters += " " +  widget[3] + "=\"" + widget[0].get_text() + "\""
+			elif ( widget[1] == "ComboBoxText" ):
+				if ( ( widget[0].get_active_text() != "" ) & ( widget[0].get_active_text() != None ) ):
+					parameters += " " +  widget[3] + "=\"" + widget[0].get_active_text() + "\""
+			elif ( widget[1] == "SpinnerInt" ):
+				if ( ( widget[0].get_value() != "") & ( widget[0].get_value() != None ) ):
+					parameters += " " + widget[3] + "=\"" + str(int(widget[0].get_value())) + "\""
+			elif ( widget[1] == "SpinnerFloat" ):
+				if ( ( widget[0].get_value() != "") & ( widget[0].get_value() != None ) ):
+					parameters += " " + widget[3] + "=\"" + str(widget[0].get_value()) + "\""
+		return parameters
+	
 	def on_btnAnalysisAddOK_clicked(self, window):
 		model = self.builder.get_object("lstAnalyses")
 		lblAnalWarning = self.builder.get_object("lblAnalWarning")
 		errordialog = self.builder.get_object("analysis_warning")
-		if self.ConstructedAnalysis.is_only_once() & self.duplicate_analysis(self.ConstructedAnalysis.get_xml_name(), model):
+		cmbAnalyses = self.builder.get_object("cmbAnalyses")
+		cmbPipeline = self.builder.get_object("cmbPipeline")
+		if (self.pluginDefs.is_only_once(cmbAnalyses.get_active_text(), cmbPipeline.get_active_text())) & self.duplicate_analysis(cmbAnalyses.get_active_text(), model):
 			lblAnalWarning.set_text("Analysis already present. Only one analysis of this type is allowed.")
 			errordialog.run()
 		#Check if any fields are blank
-		elif ( self.ConstructedAnalysis.required_fields_empty() ):
+		elif ( self.required_analysis_fields_empty() ):
 			lblAnalWarning.set_text("A required field is empty. Please fill in all required fields (denoted with red text).")
 			errordialog.run()
 		else:
-			model.append((self.ConstructedAnalysis.get_xml_name(), self.ConstructedAnalysis.get_parameter_string()))
+			model.append((cmbAnalyses.get_active_text(), self.get_analysis_parameter_string()))
+			self.ConstructedAnalysisInfo = None
 			window.hide()
 			
 		
 	def on_btnAnalysisAddCancel_clicked(self, window):
-		self.ConstructedAnalysis = None
+		self.ConstructedAnalysisInfo = None
 		window.hide()
 		
 	def on_btnEmptyWarningOK_clicked(self, dialogue):
@@ -1076,6 +861,7 @@ class WindowManager(object):
 	    self.builder.add_from_file(determine_path() + "/res/AxiomeUiWindow.ui")
 	    self.builder.connect_signals(self)
 	    self.mainWindow = self.builder.get_object("axiome_ui_window")
+	    self.pluginDefs = analysisDefs(determine_path() + "/res/plugin-defs.xml")
 	    self.DefineMetadata = None
 	    self.MetadataLabels = None
 	    self.DefineSourceFiles = None
@@ -1084,7 +870,7 @@ class WindowManager(object):
 	    self.SampleData = None
 	    self.Editing = None
 	    self.PropContainer = None
-	    self.ConstructedAnalysis = None
+	    self.ConstructedAnalysisInfo = None
 	    self.SampleFileIndex = 0
 	    self.XMLOutput = None
 	    self.mainWindow.show()
