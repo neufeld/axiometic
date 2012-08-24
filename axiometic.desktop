@@ -3,5 +3,5 @@ Version=0.1
 Type=Application
 Name=Axiomeatic
 Comment=UI companion for AXIOME
-Exec=axiomeatic
-Icon=/usr/share/icons/axiomeatic.icon
+Exec=axiometic
+Icon=/usr/share/icons/axiometic.icon

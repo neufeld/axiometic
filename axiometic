@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+import python_axiometic.axiomeui
+
+python_axiometic.axiomeui.main()

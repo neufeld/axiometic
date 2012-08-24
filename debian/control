@@ -1,17 +1,17 @@
-Source: axiomeatic
+Source: axiometic
 Section: science
 Priority: extra
 Maintainer: Michael Hall <hallm2533@gmail.com>
 Build-Depends: debhelper (>= 8.0.0), python (>= 2.7)
 Standards-Version: 3.9.3
 Homepage: https://github.com/neufeld/
-#Vcs-Git: git://git.debian.org/collab-maint/axiomeatic.git
-#Vcs-Browser: http://git.debian.org/?p=collab-maint/axiomeatic.git;a=summary
+#Vcs-Git: git://git.debian.org/collab-maint/axiometic.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/axiometic.git;a=summary
 
-Package: axiomeatic
+Package: axiometic
 Architecture: any
 Depends: ${misc:Depends}, ${python:Depends}, python-gi (>= 3.2.2), python-gtk2 (>= 2.24.0)
 Description: User interface companion for AXIOME
- Axiomeatic is a user interface companion for the 
+ Axiometic is a user interface companion for the 
  AXIOME numerical microbial ecology analysis 
  pipeline. It generates a .ax file for use with AXIOME.

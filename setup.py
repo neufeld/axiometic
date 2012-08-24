@@ -5,9 +5,9 @@ from distutils.core import setup
 #You could be more specific.
 files = ["res/*"]
 
-setup(name = "axiomeatic",
+setup(name = "axiometic",
     version = "0.1",
-    description = "Axiomeatic: GUI companion for AXIOME",
+    description = "Axiometic: GUI companion for AXIOME",
     author = "Michael Hall",
     author_email = "hallm2533@gmail.com",
     url = "http://neufeld.github.com/",
@@ -15,13 +15,13 @@ setup(name = "axiomeatic",
     #(If you have other packages (dirs) or modules (py files) then
     #put them into the package directory - they will be found 
     #recursively.)
-    packages = ['python_axiomeatic'],
+    packages = ['python_axiometic'],
     #'package' package must contain files (see list above)
     #I called the package 'package' thus cleverly confusing the whole issue...
     #This dict maps the package name =to=> directories
     #It says, package *needs* these files.
-    package_data = {'python_axiomeatic' : files },
+    package_data = {'python_axiometic' : files },
     #'runner' is in the root.
-    scripts = ["axiomeatic"],
-    long_description = """Axiomeatic is a GUI companion for AXIOME that guides the user through the creation of a .ax AXIOME configuration file.""" 
+    scripts = ["axiometic"],
+    long_description = """Axiometic is a GUI companion for AXIOME that guides the user through the creation of a .ax AXIOME configuration file.""" 
 )

@@ -1,4 +1,4 @@
 dist/
 MANIFEST
-python_axiomeatic/*.pyc
-python_axiomeatic/res/*~
+python_axiometic/*.pyc
+python_axiometic/res/*~

@@ -10,5 +10,5 @@ This package requires Python 2.7, python-gi, and pygtk.
 To install from source, run:
 sudo python setup.py install
 
-Then, run the command `axiomeatic` and follow the wizard to create a .ax file for your AXIOME
+Then, run the command `axiometic` and follow the wizard to create a .ax file for your AXIOME
 analysis.
