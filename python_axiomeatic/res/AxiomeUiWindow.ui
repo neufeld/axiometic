@@ -58,6 +58,26 @@ The resulting file can be called as the parameter to the `axiome` command on you
           </packing>
         </child>
         <child>
+          <object class="GtkAlignment" id="alnOpenAX">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="left_padding">50</property>
+            <property name="right_padding">50</property>
+            <child>
+              <object class="GtkFileChooserButton" id="btnOpenAX">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <signal name="file-set" handler="on_btnOpenAX_file_set" swapped="no"/>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkHButtonBox" id="buttonbox1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -79,7 +99,7 @@ The resulting file can be called as the parameter to the `axiome` command on you
             </child>
             <child>
               <object class="GtkButton" id="btnBegin">
-                <property name="label" translatable="yes">Begin</property>
+                <property name="label" translatable="yes">Start New File &gt;</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -97,7 +117,7 @@ The resulting file can be called as the parameter to the `axiome` command on you
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">10</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
       </object>

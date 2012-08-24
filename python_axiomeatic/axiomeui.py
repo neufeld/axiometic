@@ -27,11 +27,24 @@ pygtk.require("2.0")
 import gtk, gobject, gio
 from xml.dom.minidom import parse
 
+class SampleData:
+	def __init__(self):
+		self.dictionary = {}
+		
+	def set_metadata(self, key, value):
+		self.dictionary[key] = value
+		
+	def get_metadata(self, key):
+		if self.dictionary.has_key(key):
+			return self.dictionary[key]
+		else:
+			return False
+
 class XMLFile:
 	def __init__(self, path):
 		self.File = parse(path)
 		
-	def getNextSibling(node):
+	def getNextSibling(self, node):
 		if (node.nextSibling != None):
 			return node.nextSibling
 		else:
@@ -219,7 +232,104 @@ class analysisDefs(XMLFile):
 			
 		return labeltext, mainBox, info
 
+class AXFile(XMLFile):
+	def __init__(self, path, builder):
+		try:
+			XMLFile.__init__(self, path)
+		except:
+			error_dialogue("Could not parse .ax file. Please check file.")
+			self.Parsed = False
+			return
+		#Needs access to the Gtk Builder so we can grab the lists
+		self.builder = builder
+		self.builder.get_object("lstMetadata").clear()
+		self.header = self.getHeader()
+		self.SampleData = list()
+		node = self.header.firstChild
+		while node != None:
+			if node.nodeType == 1:
+				if node.nodeName.lower() == "def":
+					self.processDef(node)
+				elif node.nodeName.lower() == "panda":
+					self.processPanda(node)
+				elif node.nodeName.lower() == "fasta":
+					self.processFasta(node)
+				else:
+					self.processAnalysis(node)
+			node = self.getNextSibling(node)
+		self.Parsed = True
 
+	def getHeader(self):
+		node = self.getNextSibling(self.File.firstChild)
+		while node.nodeType != 1:
+			node = self.getNextSibling(node)
+		return node
+			
+	def processPanda(self, node):
+		print "Adding panda file..."
+		fwd = node.getAttribute("forward")
+		rev = node.getAttribute("reverse")
+		version = node.getAttribute("version")
+		fprimer = node.getAttribute("fprimer")
+		rprimer = node.getAttribute("rprimer")
+		thresh = node.getAttribute("threshold")
+		#Add new file to sources list
+		sourceslist = self.builder.get_object("lstSourceInfo")
+		metadatalist = self.builder.get_object("lstMetadata")
+		sourceslist.append(("PANDA", fwd, rev, fprimer, rprimer, thresh, version))
+		child = node.firstChild
+		#self.SampleData.append(gtk.ListStore(*[gobject.TYPE_STRING]*(len(metadatalist)+1)))
+		self.SampleData.append(list())
+		while child != None:
+			if child.nodeType == 1:
+				sampleinfo = {}
+				sampleinfo["regextag"] = child.getAttribute("tag")
+				for row in metadatalist:
+					sampleinfo[row[0]] = child.getAttribute(row[0])
+				#sampleliststore =  self.SampleData[len(self.SampleData)-1].append(sampleinfo)
+				self.SampleData[len(self.SampleData)-1].append(sampleinfo)
+			child = self.getNextSibling(child)
+	
+	def processFasta(self, node):
+		print "Adding fasta file..."
+		filename = node.getAttribute("file")
+		#Add new file to sources list
+		sourceslist = self.builder.get_object("lstSourceInfo")
+		metadatalist = self.builder.get_object("lstMetadata")
+		newrow = sourceslist.append()
+		sourceslist.set(newrow, 0, "FASTA", 1, filename)
+		child = node.firstChild
+		self.SampleData.append(list())
+		while child != None:
+			if child.nodeType == 1:
+				sampleinfo = {}
+				sampleinfo["regextag"] = child.getAttribute("regex")
+				for row in metadatalist:
+					sampleinfo[row[0]] = child.getAttribute(row[0])
+				self.SampleData[len(self.SampleData)-1].append(sampleinfo)
+			child = self.getNextSibling(child)
+		
+	def processDef(self, node):
+		lstMetadata = self.builder.get_object("lstMetadata")
+		print "Adding metadata: " + node.getAttribute("name") + " Type: " + node.getAttribute("type")
+		shorttype = node.getAttribute("type")
+		if shorttype.lower() == "s":
+			longtype = "String"
+		elif shorttype.lower() == "i":
+			longtype = "Integer"
+		elif shorttype.lower() == "d":
+			longtype = "Decimal"
+		lstMetadata.append((node.getAttribute("name"), longtype))
+		
+	
+	def processHeader(self, node):
+		printAttributes(node)
+		
+	def processAnalysis(self, node):
+		print "Adding analysis: " + node.nodeName
+		
+	def get_sample_data(self):
+		return self.SampleData
 
 def determine_path():
     """Borrowed from wxglade.py"""
@@ -245,29 +355,25 @@ def error_dialogue(label):
 class WindowManager(object): 
 
 	### Main Window ###
-		
-	def on_btnBegin_clicked(self, widget):
-		if (self.DefineMetadata == None):
-			self.builder.add_from_file(determine_path() + "/res/DefineMetadata.ui")
-			self.builder.connect_signals(self)
-			self.DefineMetadata = self.builder.get_object("axiome_define_metadata")
-			self.mainWindow.hide()
+	
+	def on_btnOpenAX_file_set(self, widget):
+		self.OpenAX = AXFile(widget.get_filename(), self.builder)
+		self.SampleData = self.OpenAX.get_sample_data()
+		if self.OpenAX.Parsed:
+			self.IntroWindow.hide()
 			self.DefineMetadata.show()
 		else:
-			self.DefineMetadata.show()
+			widget.unselect_all()
+		
+	def on_btnBegin_clicked(self, widget):
+		self.IntroWindow.hide()
+		self.DefineMetadata.show()
 			
 	### Step 1: Define Metadata ###
 			
 	def on_btnNext1_clicked(self, widget):
-		if (self.DefineSourceFiles == None):
-			self.builder.add_from_file(determine_path() + "/res/DefineSourceFiles.ui")
-			self.builder.connect_signals(self)
-			self.DefineSourceFiles = self.builder.get_object("axiome_define_source_files")
-			self.DefineMetadata.hide()
-			self.DefineSourceFiles.show()
-		else:
-			self.DefineMetadata.hide()
-			self.DefineSourceFiles.show()
+		self.DefineMetadata.hide()
+		self.DefineSourceFiles.show()
 			
 	def on_btnMetadataAdd_clicked(self, treeview):
 		model = treeview.get_model()
@@ -290,7 +396,10 @@ class WindowManager(object):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
-		model.remove(selectedrow)
+		try:
+			model.remove(selectedrow)
+		except:
+			pass
 		
 	def on_rendMetadataName_edited(self, textrenderer, path, new_text):
 		if new_text[0].isalpha():
@@ -320,7 +429,15 @@ class WindowManager(object):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
-		model.remove(selectedrow)
+		try:
+			model.remove(selectedrow)
+		except:
+			pass
+		path = treeview.get_model().get_path(selectedrow)
+		try:
+			del self.SampleData[int(path[0])]
+		except:
+			pass
 		
 	def on_btnEditSource_clicked(self, treeview):
 		selection = treeview.get_selection()
@@ -374,18 +491,33 @@ class WindowManager(object):
 		self.DefineSourceFiles.hide()
 		self.DefineMetadata.show()
 		
+	def dict_to_liststore(self, dictlist):
+		metadatalist = self.builder.get_object("lstMetadata")
+		metaliststore = gtk.ListStore(*[gobject.TYPE_STRING]*(len(metadatalist)+1))
+		for i in range(0, len(dictlist)):
+			metalist = list()
+			metalist.append(dictlist[i]['regextag'])
+			for row in metadatalist:
+				try:
+					data = dictlist[i][row[0]]
+				except:
+					data = ""
+				metalist.append(data)
+			metaliststore.append(metalist)
+		return metaliststore
+		
 	def on_btnSourceNext_clicked(self, window):
 		source_list = self.builder.get_object("lstSourceInfo")
 		if len(source_list) == 0:
 			error_dialogue("At least one source file must be specified.")
-		else:
-			if (self.DefineSamples == None):
-				self.builder.add_from_file(determine_path() + "/res/DefineSamples.ui")
-				self.builder.connect_signals(self)
-				self.DefineSamples = self.builder.get_object("axiome_define_samples")
+		else:	
 			metadatamodel = self.builder.get_object("lstMetadata")
 			treeview = self.builder.get_object("treSampleData")
 			colindex = 0	
+			colHeader = self.builder.get_object("colID")
+			for column in treeview.get_columns():
+				treeview.remove_column(column)
+			treeview.append_column(colHeader)
 			for row in metadatamodel:
 				colindex += 1
 				rend = gtk.CellRendererText()
@@ -395,12 +527,12 @@ class WindowManager(object):
 				col.add_attribute(rend, "text", colindex)
 				treeview.append_column(col)
 			filelist = self.builder.get_object("lstSourceInfo")
-			self.SampleData = list()
-			for filename in filelist:
-				self.SampleData.append(gtk.ListStore(*[gobject.TYPE_STRING]*(colindex+1)))
-			treeview.set_model(self.SampleData[0])
+			if self.SampleData == None:
+				self.SampleData = list()
+				for filename in filelist:
+					self.SampleData.append(list())
+			treeview.set_model(self.dict_to_liststore(self.SampleData[0]))
 			numfiles = len(filelist)
-			colHeader = self.builder.get_object("colID")
 			if filelist[0][0].lower() == "fasta":
 				colHeader.set_title("Regex")
 			step3label = self.builder.get_object("lblStep3")
@@ -441,6 +573,7 @@ class WindowManager(object):
 			else:
 				newrow = model.append()
 				model.set(newrow, 0, "FASTA", 1, filepath)
+				self.SampleData.append(list())
 				
 			window.hide()
 			self.DefineSourceFiles.show()
@@ -466,6 +599,7 @@ class WindowManager(object):
 				self.Editing = None
 			else:
 				model.append(("PANDA", fwdfilepath, revfilepath, fwdprimer, revprimer, quality, str(casava_version)))
+				self.SampleData.append(list())
 			
 			window.hide()
 			self.DefineSourceFiles.show()
@@ -489,21 +623,33 @@ class WindowManager(object):
 	def on_btnSampleAdd_clicked(self, treeview):
 		listmodel = treeview.get_model()
 		listmodel.append()
+		self.SampleData[self.SampleFileIndex].append({})
+		
 		
 	def on_btnSampleRemove_clicked(self, treeview):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
-		model.remove(selectedrow)
+		rownum = model.get_path(selectedrow)[0]
+		try:
+			model.remove(selectedrow)
+			del self.SampleData[self.SampleFileIndex][rownum]
+		except:
+			pass
 		
 	def on_sample_data_edited(self, textrenderer, path, new_text, colindex=0):
-		selectedrow = self.SampleData[self.SampleFileIndex].get_iter(path)
-		self.SampleData[self.SampleFileIndex].set(selectedrow, colindex, new_text)
+		treeview = self.builder.get_object("treSampleData")
+		selectedrow = treeview.get_model().get_iter(path)
+		metadataname = treeview.get_column(colindex).get_title()
+		if (metadataname == "Regex") | (metadataname == "Tag"):
+			metadataname = "regextag"
+		self.SampleData[self.SampleFileIndex][int(path)][metadataname] = new_text
+		treeview.get_model().set(selectedrow, colindex, new_text)
 	
 	def update_sample_display(self):
 			treeview = self.builder.get_object("treSampleData")
 			filelist = self.builder.get_object("lstSourceInfo")
-			treeview.set_model(self.SampleData[self.SampleFileIndex])
+			treeview.set_model(self.dict_to_liststore(self.SampleData[self.SampleFileIndex]))
 			step3label = self.builder.get_object("lblStep3")
 			filenamelabel = self.builder.get_object("lblSampleFilename")
 			step3label.set_label("Step 3: Define Samples (File " + str(self.SampleFileIndex + 1) + " of " + str(len(filelist)) + ")")
@@ -516,20 +662,8 @@ class WindowManager(object):
 		
 	def on_btnSampleBack_clicked(self, widget):
 		if (self.SampleFileIndex == 0):
-			lblError = gtk.Label("Going back will erase all input metadata.\nContinue?")
-			lblError.set_justify(gtk.JUSTIFY_CENTER)
-			dialog = gtk.Dialog("AXIOME: Back?", None, gtk.DIALOG_MODAL | \
-			gtk.DIALOG_DESTROY_WITH_PARENT, (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO))
-			dialog.get_content_area().pack_start(lblError, True, True, 25)
-			lblError.show()
-			response = dialog.run()
-			dialog.destroy()
-			if response == gtk.RESPONSE_YES:
-				self.DefineSamples.hide()
-				self.DefineSourceFiles.show()
-				return False
-			else:
-				return True
+			self.DefineSamples.hide()
+			self.DefineSourceFiles.show()
 		else:
 			self.SampleFileIndex -= 1
 			self.update_sample_display()
@@ -546,28 +680,10 @@ class WindowManager(object):
 		elif emptyfield:
 			error_dialogue("One or more metadata fields empty.\nAll fields must be filled.")
 		else:
-			if ((self.SampleFileIndex +1) < len(self.SampleData)):
+			if ((self.SampleFileIndex+1) < len(self.SampleData)):
 				self.SampleFileIndex += 1
 				self.update_sample_display()
-			else:
-				if (self.DefineAnalyses == None):
-					self.builder.add_from_file(determine_path() + "/res/DefineAnalyses.ui")
-					self.builder.connect_signals(self)
-					self.DefineAnalyses = self.builder.get_object("axiome_define_analyses")
-					#Set up the QIIME analysis as default
-					cmbPipeline = self.builder.get_object("cmbPipeline")
-					cmbQOTU = self.builder.get_object("cmbQOTU")
-					cmbQAlign = self.builder.get_object("cmbQAlign")
-					cmbQPhylo = self.builder.get_object("cmbQPhylo")
-					cmbMOTU = self.builder.get_object("cmbMOTU")
-					cmbQOTU.set_active(7)
-					cmbQAlign.set_active(2)
-					cmbQPhylo.set_active(0)
-					cmbMOTU.set_active(0)
-					cmbPipeline.get_model().clear()
-					for key in self.pluginDefs.pipe_analysis_dict:
-						cmbPipeline.append_text(key)
-					cmbPipeline.set_active(0)
+			else:			
 				self.DefineSamples.hide()
 				self.DefineAnalyses.show()
 		
@@ -622,7 +738,10 @@ class WindowManager(object):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
 		selectedrow = selection.get_selected()[1]
-		model.remove(selectedrow)
+		try:
+			model.remove(selectedrow)
+		except:
+			pass
 		
 	def on_cmbAnalyses_changed(self, box):
 		if (self.PropContainer != None):
@@ -740,7 +859,7 @@ class WindowManager(object):
 		pipeline = self.builder.get_object("cmbPipeline").get_active_text()
 		outstring = "<axiome version=\"1.6\" "
 		
-		if pipeline == "QIIME":
+		if pipeline == "qiime":
 			outstring = outstring + "pipeline=\"qiime\" "
 			alignmethod = self.builder.get_object("cmbQAlign").get_active_text()
 			phylomethod = self.builder.get_object("cmbQPhylo").get_active_text()
@@ -798,7 +917,7 @@ class WindowManager(object):
 				searchterm = "regex"
 			elif row[0].lower() == "panda":
 				self.XMLOutput += "\t<panda forward=\"" + row[1] + "\" reverse=\"" \
-				+ row[2] + "\" version=\"" + self.builder.get_object("cmbFastqVers").get_model()[row[6]][0] + "\""
+				+ row[2] + "\" version=\"" + row[6] + "\""
 				if (row[3] != None) & (row[3] != ""):
 					self.XMLOutput += " fprimer=\"" + row[3] + "\""
 				if (row[4] != None) & (row[4] != ""):
@@ -855,25 +974,72 @@ class WindowManager(object):
 			return False
 		else:
 			return True
+			
+	### Window Setup Functions ###
+	def setup_metadata_window(self):
+		self.builder.add_from_file(determine_path() + "/res/DefineMetadata.ui")
+		self.builder.connect_signals(self)
+		DefineMetadata = self.builder.get_object("axiome_define_metadata")
+		return DefineMetadata
+		
+	def setup_sourcefiles_window(self):
+		self.builder.add_from_file(determine_path() + "/res/DefineSourceFiles.ui")
+		self.builder.connect_signals(self)
+		DefineSourceFiles = self.builder.get_object("axiome_define_source_files")
+		return DefineSourceFiles
+		
+	def setup_samplefiles_window(self):
+		self.builder.add_from_file(determine_path() + "/res/DefineSamples.ui")
+		self.builder.connect_signals(self)
+		DefineSamples = self.builder.get_object("axiome_define_samples")
+		return DefineSamples
+		
+	def setup_analyses_window(self):
+		self.builder.add_from_file(determine_path() + "/res/DefineAnalyses.ui")
+		self.builder.connect_signals(self)
+		DefineAnalyses = self.builder.get_object("axiome_define_analyses")
+		#Set up the QIIME analysis as default
+		cmbPipeline = self.builder.get_object("cmbPipeline")
+		cmbQOTU = self.builder.get_object("cmbQOTU")
+		cmbQAlign = self.builder.get_object("cmbQAlign")
+		cmbQPhylo = self.builder.get_object("cmbQPhylo")
+		cmbMOTU = self.builder.get_object("cmbMOTU")
+		cmbQOTU.set_active(7)
+		cmbQAlign.set_active(2)
+		cmbQPhylo.set_active(0)
+		cmbMOTU.set_active(0)
+		cmbPipeline.get_model().clear()
+		for key in self.pluginDefs.pipe_analysis_dict:
+			cmbPipeline.append_text(key)
+		cmbPipeline.set_active(0)
+		return DefineAnalyses
 		
 	def __init__(self):
 	    self.builder = gtk.Builder()
 	    self.builder.add_from_file(determine_path() + "/res/AxiomeUiWindow.ui")
 	    self.builder.connect_signals(self)
-	    self.mainWindow = self.builder.get_object("axiome_ui_window")
+	    self.IntroWindow = self.builder.get_object("axiome_ui_window")
 	    self.pluginDefs = analysisDefs(determine_path() + "/res/plugin-defs.xml")
-	    self.DefineMetadata = None
+	    
+	    self.DefineMetadata = self.setup_metadata_window()
 	    self.MetadataLabels = None
-	    self.DefineSourceFiles = None
-	    self.DefineSamples = None
-	    self.DefineAnalyses = None
+	    
+	    self.DefineSourceFiles = self.setup_sourcefiles_window()
+	    
+	    self.DefineSamples = self.setup_samplefiles_window()
 	    self.SampleData = None
+	    self.DefineAnalyses = self.setup_analyses_window()
+	    
+	    
+	    #Misc things to keep track of things without having to jump
+	    # through GTK parent/child lookup hoops
 	    self.Editing = None
 	    self.PropContainer = None
 	    self.ConstructedAnalysisInfo = None
 	    self.SampleFileIndex = 0
 	    self.XMLOutput = None
-	    self.mainWindow.show()
+	    self.OpenAX = None
+	    self.IntroWindow.show()
 	    
 def main():
 	mainWindow = WindowManager()
