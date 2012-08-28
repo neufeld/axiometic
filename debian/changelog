@@ -1,3 +1,11 @@
+axiometic (0.1-1ubuntu1) precise; urgency=low
+
+  * Renamed package from axiomeatic to axiometic
+  * Added ability to open .ax files
+  * Changed the analyses to be pulled from an external XML file
+
+ -- Michael Hall <hallm2533@gmail.com>  Tue, 28 Aug 2012 15:59:10 -0400
+
 axiomeatic (0.1-1) precise; urgency=low
 
   * Initial release (closes: bug#00100)
