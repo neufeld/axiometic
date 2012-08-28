@@ -1,3 +1,9 @@
+axiometic (0.2) precise; urgency=low
+
+  * Version increment for Launchpad to not be confused :)
+
+ -- Michael Hall <hallm2533@gmail.com>  Tue, 28 Aug 2012 16:26:44 -0400
+
 axiometic (0.1-1~ppa1) precise; urgency=low
 
   * Renamed package from axiomeatic to axiometic
