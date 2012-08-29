@@ -27,19 +27,6 @@ pygtk.require("2.0")
 import gtk, gobject, gio
 from xml.dom.minidom import parse
 
-class SampleData:
-	def __init__(self):
-		self.dictionary = {}
-		
-	def set_metadata(self, key, value):
-		self.dictionary[key] = value
-		
-	def get_metadata(self, key):
-		if self.dictionary.has_key(key):
-			return self.dictionary[key]
-		else:
-			return False
-
 class XMLFile:
 	def __init__(self, path):
 		self.File = parse(path)
@@ -243,7 +230,8 @@ class AXFile(XMLFile):
 		#Needs access to the Gtk Builder so we can grab the lists
 		self.builder = builder
 		self.builder.get_object("lstMetadata").clear()
-		self.header = self.getHeader()
+		self.header = self.getHeader()		
+		self.processHeader(self.header)
 		self.SampleData = list()
 		node = self.header.firstChild
 		while node != None:
@@ -322,11 +310,86 @@ class AXFile(XMLFile):
 		lstMetadata.append((node.getAttribute("name"), longtype))
 		
 	
-	def processHeader(self, node):
-		printAttributes(node)
+	def processHeader(self, header):
+		#Process cluster ID
+		cluster = header.getAttribute("cluster-identity")
+		if cluster != None:
+			self.builder.get_object("adjCluster").set_value(float(cluster))
+		pipeline = header.getAttribute("pipeline")
+		if pipeline.lower() == "mothur":
+			self.builder.get_object("cmbPipeline").set_active(1)
+			classseqs = header.getAttribute("classification-sequences")
+			self.builder.get_object("txtMClassSeqs").set_text(classseqs)
+			classtaxa = header.getAttribute("classification-taxonomy")
+			self.builder.get_object("txtMClassTaxa").set_text(classtaxa)
+			aligntemplate = header.getAttribute("alignment-template")
+			self.builder.get_object("txtMAlign").set_text(aligntemplate)
+			otumethod = header.getAttribute("otu-method")
+			if (otumethod.lower() == "an") | (otumethod.lower() == "average neighbor") | (otumethod.lower() == "average"):
+				self.builder.get_object("cmbMOTU").set_active(0)
+			elif (otumethod.lower() == "fn") | (otumethod.lower() == "furthest neighbor") | (otumethod.lower() == "furthest"):
+				self.builder.get_object("cmbMOTU").set_active(1)
+			elif (otumethod.lower() == "nn") | (otumethod.lower() == "nearest neighbor") | (otumethod.lower() == "nearest"):
+				self.builder.get_object("cmbMOTU").set_active(1)
+			else:
+				self.builder.get_object("cmbMOTU").set_active(0)
+			verbosity = header.getAttribute("verbose")
+			if (verbosity.lower() == "true") | (verbosity.lower() == "t"):
+				self.builder.get_object("chkMVerbose").set_active(True)
+		elif pipeline.lower() == "qiime":
+			self.builder.get_object("cmbPipeline").set_active(0)
+			verbosity = header.getAttribute("verbose")
+			if (verbosity.lower() == "true") | (verbosity.lower() == "t"):
+				self.builder.get_object("chkQVerbose").set_active(True)
+			align = header.getAttribute("align-method")
+			otu = header.getAttribute("otu-method")
+			phylo = header.getAttribute("phylogeny-method")
+			blastdb = header.getAttribute("otu-blastdb")
+			flags = header.getAttribute("otu-flags")
+			refseqs = header.getAttribute("otu-refseqs")
+			self.builder.get_object("txtQOTUFlags").set_text(flags)
+			self.builder.get_object("txtQOTURefSeqs").set_text(refseqs)
+			self.builder.get_object("txtQOTUBlastDB").set_text(blastdb)
+			phyloindicies = { "fasttree":0, "fast tree":0, "fasttree_v1":1, \
+			"raw-fasttree":2, "raw-fasttreemp":3, "fasttreemp":3, "clustalw":4, \
+			"clustal":4, "clearcut":5, "raxml":6, "raxml_v730":7, "raxml v730":7, \
+			"muscle":8 }
+			otuindicies = { "usearch":0, "usearch_ref":1, "usearch-ref":1, \
+			"prefix_suffix":2, "prefix-suffix":2, "prefixsuffix":2, "prefix suffix":2, \
+			"mothur":3, "trie":4, "blast":5, "uclust_ref":6, "uclust-ref":6, \
+			"cdhit":7, "cd-hit":7, "raw-cdhit":8, "raw-cd-hit":8, "uclust":9, \
+			"raw-uclust":10 }
+			alignindicies = { "infernal":0, "muscle":1, "pynast":2 }
+			try:
+				phyloindex = phyloindicies[phylo]
+			except:
+				phyloindex = 0
+			try:
+				otuindex = otuindicies[otu]
+			except:
+				otuindex = 7
+			try:
+				alignindex = alignindicies[align]
+			except:
+				alignindex = 2
+			self.builder.get_object("cmbQPhylo").set_active(phyloindex)
+			self.builder.get_object("cmbQAlign").set_active(alignindex)
+			self.builder.get_object("cmbQOTU").set_active(otuindex)
+			
 		
 	def processAnalysis(self, node):
-		print "Adding analysis: " + node.nodeName
+		#Multi-core is a special case
+		if node.nodeName == "multicore":
+			numcores = node.getAttribute("num-cores")
+			self.builder.get_object("chkMultiCore").set_active(True)
+			self.builder.get_object("adjNumCores").set_value(int(numcores))
+		#All other analyses processed the same way
+		else:
+			attributestring = ""
+			for i in range(0, node.attributes.length):
+				attribute = node.attributes.item(i)
+				attributestring += " " + attribute.nodeName + "=\"" + attribute.nodeValue + "\""
+			self.builder.get_object("lstAnalyses").append((node.nodeName, attributestring))
 		
 	def get_sample_data(self):
 		return self.SampleData
@@ -838,6 +901,22 @@ class WindowManager(object):
 		self.DefineSamples.show()
 	
 	def on_btnLaunchSave_clicked(self, savedialog):
+		#Get pipeline info
+		pipeline = self.builder.get_object("cmbPipeline").get_active_text()
+		#For mothur, we require the file locations for the template, classifier seqs, and classifier taxa
+		if (pipeline.lower() == "mothur"):
+			classseqs = self.builder.get_object("txtMClassSeqs").get_text()
+			classtaxa = self.builder.get_object("txtMClassTaxa").get_text()
+			aligntemplate = self.builder.get_object("txtMAlign").get_text()
+			if (classtaxa == "") | (classtaxa == None):
+				error_dialogue("Classification Taxonomy file location must be provided.")
+				return
+			elif (classseqs == "") | (classseqs == None):
+				error_dialogue("Classification Sequences file location must be provided.")
+				return
+			elif (aligntemplate == "") | (aligntemplate == None):
+				error_dialogue("Alignment Template file location must be provided.")
+				return
 		chooser = gtk.FileChooserDialog(title="Save File",action=gtk.FILE_CHOOSER_ACTION_SAVE, \
 			buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
 		chooser.set_default_response(gtk.RESPONSE_OK)
@@ -897,7 +976,7 @@ class WindowManager(object):
 	
 	
 	def add_axiome_tag(self):
-		self.XMLOutput = "<?xml version=\"1.0\"?>\n<!-- Generated by AXIOMATIC v 0.1 -->\n"
+		self.XMLOutput = "<?xml version=\"1.0\"?>\n<!-- Generated by AXIOMETIC v 0.2 -->\n"
 		self.XMLOutput += self.get_pipeline_string()
 		
 	def add_definitions(self):
@@ -927,11 +1006,13 @@ class WindowManager(object):
 				self.XMLOutput += ">\n"
 				searchterm = "tag"
 			for sample in self.SampleData[i]:
-				self.XMLOutput += "\t\t<sample " + searchterm + "=\"" + sample[0] + "\""
+				self.XMLOutput += "\t\t<sample " + searchterm + "=\"" + sample["regextag"] + "\""
 				j = 1
 				for label in self.MetadataLabels:
-					if sample[j] != None:
-						self.XMLOutput += " " + label + "=\"" + sample[j] + "\""
+					try:
+						self.XMLOutput += " " + label + "=\"" + sample[label] + "\""
+					except:
+						pass
 					j += 1
 				self.XMLOutput += "/>\n"
 			self.XMLOutput += "\t</" + row[0].lower() + ">\n\n"
@@ -1027,7 +1108,7 @@ class WindowManager(object):
 	    self.DefineSourceFiles = self.setup_sourcefiles_window()
 	    
 	    self.DefineSamples = self.setup_samplefiles_window()
-	    self.SampleData = None
+	    self.SampleData = list()
 	    self.DefineAnalyses = self.setup_analyses_window()
 	    
 	    
