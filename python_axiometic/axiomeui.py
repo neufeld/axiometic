@@ -522,7 +522,9 @@ class WindowManager(object):
 			self.builder.get_object("txtFwdPrimer").set_text(model.get_value(selectedrow, 3))
 			self.builder.get_object("txtRevPrimer").set_text(model.get_value(selectedrow, 4))
 			self.builder.get_object("txtQualityThresh").set_text(model.get_value(selectedrow, 5))
-			self.builder.get_object("cmbFastqVers").set_active(model.get_value(selectedrow, 6))
+			casava_version = model.get_value(selectedrow, 6)
+			casava_dict = { "1.3":0, "1.4":1, "1.5":2, "1.6":3, "1.7":4, "1.8":5 }
+			self.builder.get_object("cmbFastqVers").set_active(casava_dict[casava_version])
 			self.DefineSourceFiles.hide()
 			self.builder.get_object("axiome_fastq_panda").show()
 		else:
