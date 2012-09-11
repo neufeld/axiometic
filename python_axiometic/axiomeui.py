@@ -458,8 +458,8 @@ class WindowManager(object):
 	def on_btnMetadataRemove_clicked(self, treeview):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
-		selectedrow = selection.get_selected()[1]
 		try:
+			selectedrow = selection.get_selected()[1]
 			model.remove(selectedrow)
 		except:
 			pass
@@ -491,13 +491,10 @@ class WindowManager(object):
 	def on_btnRemoveSource_clicked(self, treeview):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
-		selectedrow = selection.get_selected()[1]
 		try:
+			selectedrow = selection.get_selected()[1]
 			model.remove(selectedrow)
-		except:
-			pass
-		path = treeview.get_model().get_path(selectedrow)
-		try:
+			path = treeview.get_model().get_path(selectedrow)
 			del self.SampleData[int(path[0])]
 		except:
 			pass
@@ -695,9 +692,9 @@ class WindowManager(object):
 	def on_btnSampleRemove_clicked(self, treeview):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
-		selectedrow = selection.get_selected()[1]
-		rownum = model.get_path(selectedrow)[0]
 		try:
+			selectedrow = selection.get_selected()[1]
+			rownum = model.get_path(selectedrow)[0]
 			model.remove(selectedrow)
 			del self.SampleData[self.SampleFileIndex][rownum]
 		except:
@@ -803,8 +800,8 @@ class WindowManager(object):
 	def on_btnAnalysisRemove_clicked(self, treeview):
 		model = treeview.get_model()
 		selection = treeview.get_selection()
-		selectedrow = selection.get_selected()[1]
 		try:
+			selectedrow = selection.get_selected()[1]
 			model.remove(selectedrow)
 		except:
 			pass
