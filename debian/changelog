@@ -1,3 +1,10 @@
+axiometic (0.2ubuntu1) precise; urgency=low
+
+  * Fixed a bug that prevented adding source files
+  * Opening a file now restores analyses and pipeline info 
+
+ -- Michael Hall <hallm2533@gmail.com>  Wed, 29 Aug 2012 17:02:16 -0400
+
 axiometic (0.2) precise; urgency=low
 
   * Version increment for Launchpad to not be confused :)

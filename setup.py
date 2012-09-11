@@ -6,7 +6,7 @@ from distutils.core import setup
 files = ["res/*"]
 
 setup(name = "axiometic",
-    version = "0.2",
+    version = "0.2ubuntu1",
     description = "Axiometic: GUI companion for AXIOME",
     author = "Michael Hall",
     author_email = "hallm2533@gmail.com",
