@@ -650,7 +650,8 @@ class WindowManager(object):
 		fwdprimer = self.builder.get_object("txtFwdPrimer").get_text()
 		revprimer = self.builder.get_object("txtRevPrimer").get_text()
 		quality = self.builder.get_object("txtQualityThresh").get_text()
-		casava_version = self.builder.get_object("cmbFastqVers").get_active()
+		casava_index = self.builder.get_object("cmbFastqVers").get_active()
+		casava_version = self.builder.get_object("lstFastqVersions")[casava_index][0]
 		
 		if (fwdfilepath == None) | (fwdfilepath == "") | \
 		(revfilepath == None) | (revfilepath == ""):
