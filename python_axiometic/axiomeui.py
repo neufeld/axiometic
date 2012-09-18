@@ -347,6 +347,7 @@ class AXFile(XMLFile):
 			blastdb = header.getAttribute("otu-blastdb")
 			flags = header.getAttribute("otu-flags")
 			refseqs = header.getAttribute("otu-refseqs")
+			tax = header.getAttribute("classification-method")
 			self.builder.get_object("txtQOTUFlags").set_text(flags)
 			self.builder.get_object("txtQOTURefSeqs").set_text(refseqs)
 			self.builder.get_object("txtQOTUBlastDB").set_text(blastdb)
@@ -360,6 +361,7 @@ class AXFile(XMLFile):
 			"cdhit":7, "cd-hit":7, "raw-cdhit":8, "raw-cd-hit":8, "uclust":9, \
 			"raw-uclust":10 }
 			alignindicies = { "infernal":0, "muscle":1, "pynast":2 }
+			taxindices = { "rdp":0, "blast":1, "rtax":2 }
 			try:
 				phyloindex = phyloindicies[phylo]
 			except:
@@ -372,9 +374,14 @@ class AXFile(XMLFile):
 				alignindex = alignindicies[align]
 			except:
 				alignindex = 2
+			try:
+				taxindex = taxindices[tax]
+			except:
+				taxindex = 0
 			self.builder.get_object("cmbQPhylo").set_active(phyloindex)
 			self.builder.get_object("cmbQAlign").set_active(alignindex)
 			self.builder.get_object("cmbQOTU").set_active(otuindex)
+			self.builder.get_object("cmbQTaxMethod").set_active(taxindex)
 			
 		
 	def processAnalysis(self, node):
@@ -942,6 +949,7 @@ class WindowManager(object):
 			outstring = outstring + "pipeline=\"qiime\" "
 			alignmethod = self.builder.get_object("cmbQAlign").get_active_text()
 			phylomethod = self.builder.get_object("cmbQPhylo").get_active_text()
+			taxmethod = self.builder.get_object("cmbQTaxMethod").get_active_text()
 			otumethod = self.builder.get_object("cmbQOTU").get_active_text()
 			clusteridentity = str(self.builder.get_object("spnQCluster").get_value())
 			otuflags = self.builder.get_object("txtQOTUFlags").get_text()
@@ -949,9 +957,10 @@ class WindowManager(object):
 			otublastdb = self.builder.get_object("txtQOTUBlastDB").get_text()
 			verbose = str(self.builder.get_object("chkQVerbose").get_active())
 			items = [alignmethod, phylomethod, otumethod, clusteridentity, \
-			otuflags, oturefseqs, otublastdb, verbose]
+			otuflags, oturefseqs, otublastdb, taxmethod, verbose]
 			labels = ["align-method", "phylogeny-method", "otu-method", \
-			"cluster-identity", "otu-flags", "otu-refseqs", "otu-blastdb", "verbose"]
+			"cluster-identity", "otu-flags", "otu-refseqs", "otu-blastdb", \
+			"classification-method", "verbose"]
 
 		elif pipeline == "mothur":
 			outstring = outstring + "pipeline=\"mothur\" "
@@ -1085,9 +1094,11 @@ class WindowManager(object):
 		cmbQAlign = self.builder.get_object("cmbQAlign")
 		cmbQPhylo = self.builder.get_object("cmbQPhylo")
 		cmbMOTU = self.builder.get_object("cmbMOTU")
+		cmbQTax = self.builder.get_object("cmbQTaxMethod")
 		cmbQOTU.set_active(7)
 		cmbQAlign.set_active(2)
 		cmbQPhylo.set_active(0)
+		cmbQTax.set_active(0)
 		cmbMOTU.set_active(0)
 		cmbPipeline.get_model().clear()
 		for key in self.pluginDefs.pipe_analysis_dict:

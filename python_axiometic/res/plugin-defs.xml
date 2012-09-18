@@ -48,6 +48,20 @@
 			</input>
 		</pipeline>
 	</blast>
+	<blast-classifier once="true">
+		<pipeline qiime="true">
+			<info>Configure QIIME's BLAST classification by specifying reference files.</info>
+			<input type="string" name="db" label="BLAST Database Filepath:">
+				<tooltip>Full filepath to reference database on server. Use only ONE of BLAST Database Filepath or Reference Sequence Filepath.</tooltip>	
+			</input>
+			<input type="string" name="seqfile" label="Reference Sequence Filepath:">
+				<tooltip>Full filepath to reference sequence file. Use only ONE of BLAST Database File Path or Reference Sequence Filepath.</tooltip>
+			</input>
+			<input type="string" name="taxfile" label="Taxonomy Filepath:">
+				<tooltip>Full filepath to the reference taxonomy file that links either the BLAST database or reference sequences to taxonomic classifications.</tooltip>
+			</input>
+		</pipeline>
+	</blast-classifier>
 	<compare once="true">
 		<pipeline qiime="true">
 			<info>Compare libraries at the specified taxonomic level.</info>
@@ -185,6 +199,23 @@
 			</input>
 		</pipeline>
 	</rdp>
+	<rtax once="true">
+		<pipeline qiime="true">
+			<info>Configure QIIME's RTAX classification by specifying reference files. Note that Rtax is only used with paired-end data.</info>
+			<input type="string" name="read-1" label="Forward Read Filepath:" required="true">
+				<tooltip>Fulle filepath to the forward read file, before clustering.</tooltip>
+			</input>
+			<input type="string" name="read-2" label="Reverse Read Filepath:" required="true">
+				<tooltip>Fulle filepath to the reverse read file, before clustering.</tooltip>
+			</input>
+			<input type="string" name="seqfile" label="Reference Sequence Filepath:" required="true">
+				<tooltip>Full filepath to reference sequence file. Required.</tooltip>
+			</input>
+			<input type="string" name="taxfile" label="Taxonomy Filepath:" required="true">
+				<tooltip>Full filepath to the reference taxonomy file that links the reference sequences to taxonomic classifications. Required.</tooltip>
+			</input>
+		</pipeline>
+	</rtax>
 	<taxaplot once="true">
 		<pipeline qiime="true" mothur="true">
 			<info>Make bar and area charts of the taxa using QIIME.</info>

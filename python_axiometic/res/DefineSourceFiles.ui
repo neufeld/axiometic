@@ -206,6 +206,20 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
+          <object class="GtkLabel" id="lblFastaWarn">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Note: Full filepath is required.
+(ex. /media/HDD/sample1.fa)</property>
+            <property name="justify">center</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkHBox" id="boxFastaInput">
             <property name="height_request">100</property>
             <property name="visible">True</property>
@@ -214,6 +228,7 @@
               <object class="GtkLabel" id="lblFastaFilePath">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">The location of the file on the server that will be running AXIOME.</property>
                 <property name="label" translatable="yes">Full File Path: </property>
               </object>
               <packing>
@@ -245,7 +260,7 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -294,7 +309,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">10</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
@@ -309,6 +324,20 @@
       <object class="GtkVBox" id="boxFastqPanda">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <child>
+          <object class="GtkLabel" id="lblFastqWarn">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Note: Full filepaths are required.
+(ex. /media/HDD/sample1_forward.fastq)</property>
+            <property name="justify">center</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkTable" id="tblFastq">
             <property name="visible">True</property>
@@ -501,7 +530,7 @@
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">5</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -537,7 +566,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="padding">2</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -584,7 +613,7 @@ version 1.4. If they quality scores have many stretches of #, then it is 1.8.</p
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">5</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
