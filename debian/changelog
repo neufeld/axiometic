@@ -1,3 +1,11 @@
+axiometic (0.2ubuntu2) precise; urgency=low
+
+  * Fixed a bug that prevented editing of source files
+  * Mitigated some crashes when removing items that didn't exist
+  * Added ability to use AXIOME 1.6ubuntu1's classification-method parameter 
+
+ -- Michael Hall <hallm2533@gmail.com>  Tue, 18 Sep 2012 14:22:35 -0400
+
 axiometic (0.2ubuntu1) precise; urgency=low
 
   * Fixed a bug that prevented adding source files
