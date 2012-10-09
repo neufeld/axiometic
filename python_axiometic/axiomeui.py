@@ -248,7 +248,7 @@ class AXFile(XMLFile):
 		self.Parsed = True
 
 	def getHeader(self):
-		node = self.getNextSibling(self.File.firstChild)
+		node = self.File.firstChild
 		while node.nodeType != 1:
 			node = self.getNextSibling(node)
 		return node
@@ -301,12 +301,12 @@ class AXFile(XMLFile):
 		lstMetadata = self.builder.get_object("lstMetadata")
 		print "Adding metadata: " + node.getAttribute("name") + " Type: " + node.getAttribute("type")
 		shorttype = node.getAttribute("type")
-		if shorttype.lower() == "s":
-			longtype = "String"
-		elif shorttype.lower() == "i":
+		if shorttype.lower() == "i":
 			longtype = "Integer"
 		elif shorttype.lower() == "d":
 			longtype = "Decimal"
+		else:
+			longtype = "String"
 		lstMetadata.append((node.getAttribute("name"), longtype))
 		
 	
@@ -336,7 +336,7 @@ class AXFile(XMLFile):
 			verbosity = header.getAttribute("verbose")
 			if (verbosity.lower() == "true") | (verbosity.lower() == "t"):
 				self.builder.get_object("chkMVerbose").set_active(True)
-		elif pipeline.lower() == "qiime":
+		else:
 			self.builder.get_object("cmbPipeline").set_active(0)
 			verbosity = header.getAttribute("verbose")
 			if (verbosity.lower() == "true") | (verbosity.lower() == "t"):
