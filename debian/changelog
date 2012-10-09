@@ -4,7 +4,7 @@ axiometic (0.2ubuntu2) precise; urgency=low
   * Mitigated some crashes when removing items that didn't exist
   * Added ability to use AXIOME 1.6ubuntu1's classification-method parameter 
 
- -- Michael Hall <hallm2533@gmail.com>  Tue, 18 Sep 2012 14:22:35 -0400
+ -- Michael Hall <hallm2533@gmail.com>  Tue, 18 Sep 2012 14:36:47 -0400
 
 axiometic (0.2ubuntu1) precise; urgency=low
 
@@ -25,7 +25,7 @@ axiometic (0.1-1~ppa1) precise; urgency=low
   * Added ability to open .ax files
   * Changed the analyses to be pulled from an external XML file
 
- -- Michael Hall <michael@michael-Aspire-3810T>  Tue, 28 Aug 2012 16:15:00 -0400
+ -- Michael Hall <hallm2533@gmail.com>  Tue, 28 Aug 2012 16:15:00 -0400
 
 axiomeatic (0.1-1) precise; urgency=low
 
