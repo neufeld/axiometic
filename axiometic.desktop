@@ -5,3 +5,4 @@ Name=Axiometic
 Comment=UI companion for AXIOME
 Exec=axiometic
 Icon=/usr/share/icons/axiometic.icon
+Categories=Science;Education
