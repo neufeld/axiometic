@@ -1131,6 +1131,10 @@ class WindowManager(object):
 	    self.SampleFileIndex = 0
 	    self.XMLOutput = None
 	    self.OpenAX = None
+	    
+	    AXfilter = self.builder.get_object("ftrAx")
+	    AXfilter.add_pattern("*.ax")
+	    AXfilter.add_pattern("*.aq")
 	    self.IntroWindow.show()
 	    
 def main():

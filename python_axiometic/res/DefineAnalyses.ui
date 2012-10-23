@@ -569,15 +569,6 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkCheckButton" id="chkQVerbose">
                 <property name="label" translatable="yes">Verbose</property>
                 <property name="visible">True</property>
@@ -623,6 +614,15 @@
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -927,7 +927,6 @@
       </object>
     </child>
   </object>
-  <object class="GtkFileFilter" id="ftrAx"/>
   <object class="GtkListStore" id="lstAnalyses">
     <columns>
       <!-- column-name Analysis -->

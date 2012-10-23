@@ -6,7 +6,7 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Axiometic</property>
     <property name="window_position">center</property>
-    <property name="default_width">400</property>
+    <property name="default_width">500</property>
     <signal name="delete-event" handler="on_close" swapped="no"/>
     <child>
       <object class="GtkVBox" id="box1">
@@ -46,9 +46,12 @@
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Axiometic guides the user through the creation of an AXIOME configuration (.ax) file.
 
-The resulting file can be called as the parameter to the `axiome` command on your analysis server.</property>
+The resulting file can be called as the parameter to the `axiome` command on your analysis server.
+
+Click the Open button below to edit an existing .ax file. Otherwise, click Start New File to begin a new configuration file.</property>
             <property name="justify">center</property>
             <property name="wrap">True</property>
+            <property name="width_chars">60</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -58,17 +61,45 @@ The resulting file can be called as the parameter to the `axiome` command on you
           </packing>
         </child>
         <child>
-          <object class="GtkAlignment" id="alnOpenAX">
+          <object class="GtkHBox" id="hbox1">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="left_padding">50</property>
-            <property name="right_padding">50</property>
             <child>
-              <object class="GtkFileChooserButton" id="btnOpenAX">
+              <object class="GtkLabel" id="lblOpenAX">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <signal name="file-set" handler="on_btnOpenAX_file_set" swapped="no"/>
+                <property name="xalign">1</property>
+                <property name="label" translatable="yes">Open:</property>
+                <property name="justify">right</property>
               </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkAlignment" id="alnOpenAX">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="left_padding">50</property>
+                <property name="right_padding">50</property>
+                <child>
+                  <object class="GtkFileChooserButton" id="btnOpenAX">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <property name="filter">ftrAx</property>
+                    <property name="width_chars">20</property>
+                    <signal name="file-set" handler="on_btnOpenAX_file_set" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -123,4 +154,5 @@ The resulting file can be called as the parameter to the `axiome` command on you
       </object>
     </child>
   </object>
+  <object class="GtkFileFilter" id="ftrAx"/>
 </interface>
