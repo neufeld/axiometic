@@ -313,7 +313,7 @@ class AXFile(XMLFile):
 	def processHeader(self, header):
 		#Process cluster ID
 		cluster = header.getAttribute("cluster-identity")
-		if cluster != None:
+		if (cluster != None) & (cluster != ""):
 			self.builder.get_object("adjCluster").set_value(float(cluster))
 		pipeline = header.getAttribute("pipeline")
 		if pipeline.lower() == "mothur":
